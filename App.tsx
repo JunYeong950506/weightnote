@@ -208,7 +208,6 @@ export default function App() {
 
   const [tab, setTab] = useState("main");
   const [period, setPeriod] = useState("1M");
-  const [inputMode, setInputMode] = useState("picker");
   const [inputWeight, setInputWeight] = useState(initialWeightRef.current);
   const [pickerInt, setPickerInt] = useState(initialParts.integer);
   const [pickerDec, setPickerDec] = useState(initialParts.decimal);
@@ -219,7 +218,6 @@ export default function App() {
   const [editId, setEditId] = useState(null);
   const [editWeight, setEditWeight] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const weightRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
@@ -268,10 +266,6 @@ export default function App() {
       href: "/site.webmanifest",
     });
   }, []);
-
-  useEffect(() => {
-    if (inputMode === "direct") weightRef.current?.focus();
-  }, [inputMode]);
 
   const sorted = [...records].sort((a, b) => a.date.localeCompare(b.date));
   const latest = sorted[sorted.length - 1];
@@ -337,27 +331,6 @@ export default function App() {
     setPickerInt(integer);
     setPickerDec(decimal);
     setInputWeight(nextWeight);
-  }
-
-  function syncPickerFromInput(nextValue) {
-    const normalized = clampWeight(nextValue);
-    if (!normalized) return;
-    const { integer, decimal } = weightToParts(normalized);
-    setPickerInt(integer);
-    setPickerDec(decimal);
-  }
-
-  function handleDirectWeightChange(nextValue) {
-    setInputWeight(nextValue);
-    if (!nextValue || Number.isNaN(parseFloat(nextValue))) return;
-    syncPickerFromInput(nextValue);
-  }
-
-  function handleDirectWeightBlur() {
-    if (!inputWeight || Number.isNaN(parseFloat(inputWeight))) return;
-    const normalized = clampWeight(inputWeight);
-    setInputWeight(normalized);
-    syncPickerFromInput(normalized);
   }
 
   function handleSave() {
@@ -435,6 +408,7 @@ export default function App() {
         .save-btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.25s;letter-spacing:0.02em;}
         .save-btn.ready{background:#e8ff6e;color:#0c0e14;}
         .save-btn.done{background:#6ee8a0;color:#0a2e18;}
+        .save-btn.duplicate{background:linear-gradient(135deg,#2a0b17,#4a1026);color:#ff78a7;border:1px solid rgba(255,95,157,0.45);box-shadow:0 0 0 1px rgba(255,95,157,0.2) inset;}
         .save-btn.empty{background:rgba(255,255,255,0.04);color:#8c95a5;cursor:default;}
         .rec-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.05);gap:10px;transition:background 0.15s;}
         .rec-row:last-child{border-bottom:none;}
@@ -496,35 +470,12 @@ export default function App() {
                   ariaLabel="체중 소수부 선택"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => setInputMode("direct")}
-                aria-label="숫자 직접 입력으로 전환"
-                title="숫자 직접 입력"
-                style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, cursor: "pointer", padding: 0 }}
+              <div
+                style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, padding: 0 }}
               >
                 <span style={{ fontSize: 34, fontWeight: 500, fontFamily: "'DM Mono',monospace", color: "#e8ff6e" }}>{inputWeight}</span>
                 <span style={{ fontSize: 13, color: "#b7bfcc" }}>kg</span>
-              </button>
-
-              {inputMode === "direct" && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 10 }}>
-                  <input
-                    ref={weightRef}
-                    type="number"
-                    step="0.1"
-                    min={PICKER_MIN}
-                    max={PICKER_MAX + 0.9}
-                    placeholder="00.0"
-                    value={inputWeight}
-                    onChange={(e) => handleDirectWeightChange(e.target.value)}
-                    onBlur={handleDirectWeightBlur}
-                    onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                    className="wt-input"
-                  />
-                  <span style={{ fontSize: 18, color: "#b7bfcc", fontFamily: "'DM Mono',monospace", marginTop: 8 }}>kg</span>
-                </div>
-              )}
+              </div>
             </div>
 
             <button
@@ -549,11 +500,19 @@ export default function App() {
             )}
 
             <button
-              className={`save-btn ${saveState === "done" ? "done" : inputWeight ? "ready" : "empty"}`}
+              className={`save-btn ${
+                saveState === "done"
+                  ? "done"
+                  : saveState === "duplicate"
+                    ? "duplicate"
+                    : inputWeight
+                      ? "ready"
+                      : "empty"
+              }`}
               onClick={handleSave}
               disabled={!inputWeight}
             >
-              {saveState === "done" ? "저장 완료 ✓" : saveState === "saving" ? "저장 중..." : saveState === "duplicate" ? "같은 날짜 기록 있음" : "저장"}
+              {saveState === "done" ? "저장 완료" : saveState === "saving" ? "저장 중..." : saveState === "duplicate" ? "같은 날짜 기록 있음" : "저장"}
             </button>
           </div>
 
