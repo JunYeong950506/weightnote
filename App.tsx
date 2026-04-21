@@ -7,8 +7,8 @@ import {
 const STORAGE_KEY = "wt_records_v3";
 const PICKER_MIN = 30;
 const PICKER_MAX = 200;
-const PICKER_DECIMALS = Array.from({ length: 10 }, (_, i) => i);
-const PICKER_INTEGERS = Array.from({ length: PICKER_MAX - PICKER_MIN + 1 }, (_, i) => PICKER_MIN + i);
+const PICKER_DECIMALS = Array.from({ length: 10 }, (_, i) => i).reverse();
+const PICKER_INTEGERS = Array.from({ length: PICKER_MAX - PICKER_MIN + 1 }, (_, i) => PICKER_MIN + i).reverse();
 const PICKER_ITEM_HEIGHT = 44;
 const PICKER_VISIBLE_ROWS = 5;
 const PICKER_EDGE_ROWS = Math.floor(PICKER_VISIBLE_ROWS / 2);
@@ -269,6 +269,17 @@ export default function App() {
 
   const sorted = [...records].sort((a, b) => a.date.localeCompare(b.date));
   const latest = sorted[sorted.length - 1];
+
+  useEffect(() => {
+    const selectedRecord = records.find((r) => r.date === inputDate);
+    if (!selectedRecord) return;
+    const normalized = clampWeight(selectedRecord.weight);
+    if (!normalized) return;
+    const { integer, decimal } = weightToParts(normalized);
+    setPickerInt(integer);
+    setPickerDec(decimal);
+    setInputWeight(normalized);
+  }, [inputDate, records]);
 
   const allWeights = sorted.map((r) => r.weight);
   const minW = allWeights.length ? Math.min(...allWeights) : null;
