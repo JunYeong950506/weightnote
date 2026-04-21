@@ -80,9 +80,9 @@ const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) =>
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "#1a1d24", border: "1px solid rgba(232,255,110,0.2)", borderRadius: 8, padding: "8px 14px" }}>
-      <div style={{ fontSize: 11, color: "#a3acbc", marginBottom: 2 }}>{fmtKo(payload[0].payload.date)}</div>
+      <div style={{ fontSize: 11, color: "#b7bfcc", marginBottom: 2 }}>{fmtKo(payload[0].payload.date)}</div>
       <div style={{ fontSize: 18, fontWeight: 600, fontFamily: "'DM Mono',monospace", color: "#e8ff6e" }}>
-        {payload[0].value}<span style={{ fontSize: 11, color: "#a3acbc", marginLeft: 4 }}>kg</span>
+        {payload[0].value}<span style={{ fontSize: 11, color: "#b7bfcc", marginLeft: 4 }}>kg</span>
       </div>
     </div>
   );
@@ -406,47 +406,43 @@ export default function App() {
       label: "주간 변화",
       value: weeklyChange !== null ? (weeklyChange > 0 ? `+${weeklyChange}` : `${weeklyChange}`) : "—",
       unit: weeklyChange !== null ? "kg" : "",
-      color: weeklyChange === null ? "#a3acbc" : weeklyChange < 0 ? "#6ee8c0" : weeklyChange > 0 ? "#e87a6e" : "#c1c8d4"
+      color: weeklyChange === null ? "#b7bfcc" : weeklyChange < 0 ? "#6ee8c0" : weeklyChange > 0 ? "#e87a6e" : "#d2d8e1"
     },
     { label: "최고", value: maxW ?? "—", unit: maxW ? "kg" : "", color: "#e87a6e" },
     { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#6ee8c0" },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0c0e14", color: "#f0f0f0", fontFamily: "'DM Sans','Pretendard',sans-serif", maxWidth: 430, margin: "0 auto" }}>
+    <div style={{ minHeight: "100vh", background: "#0c0e14", color: "#f0f0f0", fontFamily: "'DM Sans','Pretendard',sans-serif", maxWidth: 430, margin: "0 auto", filter: "saturate(1.08)" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
-        html{background:#0c0e14;}
+        html{background:#0c0e14;-webkit-text-size-adjust:108%;text-size-adjust:108%;}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         input[type=number]{-moz-appearance:textfield;}
         input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.4);cursor:pointer;}
         ::-webkit-scrollbar{width:4px;}
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
-        .period-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 14px;font-size:12px;color:#99a2b3;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+        .period-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 14px;font-size:12px;color:#adb5c4;cursor:pointer;transition:all 0.15s;font-family:inherit;}
         .period-btn.on{background:rgba(232,255,110,0.12);border-color:rgba(232,255,110,0.3);color:#e8ff6e;}
         .tab-pill{flex:1;background:transparent;border:none;padding:10px 0;font-size:13px;cursor:pointer;font-family:inherit;transition:all 0.2s;border-radius:10px;}
         .tab-pill.on{background:rgba(255,255,255,0.07);color:#f0f0f0;font-weight:500;}
-        .tab-pill.off{color:#8f97a7;}
-        .input-mode-pill{flex:1;background:transparent;border:none;padding:11px 0;font-size:13px;cursor:pointer;font-family:inherit;transition:all 0.2s;border-radius:11px;color:#a3acbc;letter-spacing:-0.01em;display:flex;align-items:center;justify-content:center;}
-        .input-mode-pill.on{background:rgba(255,255,255,0.08);box-shadow:0 4px 14px rgba(0,0,0,0.24);color:#e8ff6e;border:1px solid rgba(232,255,110,0.22);}
-        .input-mode-pill.off{border:1px solid transparent;}
-        .mode-ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+        .tab-pill.off{color:#a2a9b8;}
         .wt-input{background:transparent;border:none;font-size:52px;font-family:'DM Mono',monospace;font-weight:500;color:#e8ff6e;text-align:center;width:160px;outline:none;caret-color:#e8ff6e;padding:0;}
         .wt-input::placeholder{color:#2a2d1a;}
         .save-btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.25s;letter-spacing:0.02em;}
         .save-btn.ready{background:#e8ff6e;color:#0c0e14;}
         .save-btn.done{background:#6ee8a0;color:#0a2e18;}
-        .save-btn.empty{background:rgba(255,255,255,0.04);color:#7a8394;cursor:default;}
+        .save-btn.empty{background:rgba(255,255,255,0.04);color:#8c95a5;cursor:default;}
         .rec-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.05);gap:10px;transition:background 0.15s;}
         .rec-row:last-child{border-bottom:none;}
-        .ico-btn{background:transparent;border:none;cursor:pointer;color:#8f97a7;padding:5px 7px;font-size:14px;transition:color 0.15s;line-height:1;}
-        .ico-btn:hover{color:#c0c8d6;}
+        .ico-btn{background:transparent;border:none;cursor:pointer;color:#a2a9b8;padding:5px 7px;font-size:14px;transition:color 0.15s;line-height:1;}
+        .ico-btn:hover{color:#d2d8e3;}
         .edit-inp{background:rgba(255,255,255,0.07);border:1px solid rgba(232,255,110,0.35);border-radius:8px;color:#e8ff6e;font-size:16px;font-family:'DM Mono',monospace;width:78px;padding:5px 8px;text-align:right;outline:none;}
         .del-confirm{display:flex;gap:6px;align-items:center;}
         .del-yes{background:#3d1a1a;border:1px solid rgba(232,110,110,0.3);border-radius:8px;color:#e87a6e;font-size:12px;padding:5px 10px;cursor:pointer;font-family:inherit;}
-        .del-no{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#a3acbc;font-size:12px;padding:5px 10px;cursor:pointer;font-family:inherit;}
+        .del-no{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#b7bfcc;font-size:12px;padding:5px 10px;cursor:pointer;font-family:inherit;}
         .wheel-pane::-webkit-scrollbar{display:none;}
         @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
         .fade-up{animation:fadeUp 0.3s ease both;}
@@ -468,7 +464,7 @@ export default function App() {
                 value={inputDate}
                 max={todayStr()}
                 onChange={(e) => setInputDate(e.target.value)}
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#b2bac8", fontSize: 13, padding: "8px 12px", fontFamily: "inherit", outline: "none", flex: 1 }}
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#c4cad5", fontSize: 13, padding: "8px 12px", fontFamily: "inherit", outline: "none", flex: 1 }}
               />
               <button
                 type="button"
@@ -476,37 +472,6 @@ export default function App() {
                 style={{ background: "rgba(232,255,110,0.08)", border: "1px solid rgba(232,255,110,0.15)", borderRadius: 10, color: "#b6c36e", fontSize: 12, padding: "8px 12px", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
               >
                 오늘
-              </button>
-            </div>
-
-            <div style={{ display: "flex", background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 3, gap: 3, marginBottom: 20 }}>
-              <button
-                type="button"
-                className={`input-mode-pill ${inputMode === "picker" ? "on" : "off"}`}
-                onClick={() => setInputMode("picker")}
-                aria-label="스크롤 피커 입력"
-                title="스크롤 피커 입력"
-              >
-                <svg className="mode-ico" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6 5v14" />
-                  <path d="M12 5v14" />
-                  <path d="M18 5v14" />
-                  <path d="M4 8h4" />
-                  <path d="M10 12h4" />
-                  <path d="M16 16h4" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                className={`input-mode-pill ${inputMode === "direct" ? "on" : "off"}`}
-                onClick={() => setInputMode("direct")}
-                aria-label="숫자 직접 입력"
-                title="숫자 직접 입력"
-              >
-                <svg className="mode-ico" viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="4" y="4" width="16" height="16" rx="3" />
-                  <path d="M8 8h1M12 8h1M16 8h1M8 12h1M12 12h1M16 12h1M8 16h4M16 16h1" />
-                </svg>
               </button>
             </div>
 
@@ -531,37 +496,52 @@ export default function App() {
                     ariaLabel="체중 소수부 선택"
                   />
                 </div>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, marginTop: 14 }}>
+                <button
+                  type="button"
+                  onClick={() => setInputMode("direct")}
+                  aria-label="숫자 직접 입력으로 전환"
+                  title="숫자 직접 입력"
+                  style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, cursor: "pointer", padding: 0 }}
+                >
                   <span style={{ fontSize: 34, fontWeight: 500, fontFamily: "'DM Mono',monospace", color: "#e8ff6e" }}>{inputWeight}</span>
-                  <span style={{ fontSize: 13, color: "#a3acbc" }}>kg</span>
-                </div>
+                  <span style={{ fontSize: 13, color: "#b7bfcc" }}>kg</span>
+                </button>
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginBottom: 20 }}>
-                <input
-                  ref={weightRef}
-                  type="number"
-                  step="0.1"
-                  min={PICKER_MIN}
-                  max={PICKER_MAX + 0.9}
-                  placeholder="00.0"
-                  value={inputWeight}
-                  onChange={(e) => handleDirectWeightChange(e.target.value)}
-                  onBlur={handleDirectWeightBlur}
-                  onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                  className="wt-input"
-                />
-                <span style={{ fontSize: 18, color: "#a3acbc", fontFamily: "'DM Mono',monospace", marginTop: 8 }}>kg</span>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                  <input
+                    ref={weightRef}
+                    type="number"
+                    step="0.1"
+                    min={PICKER_MIN}
+                    max={PICKER_MAX + 0.9}
+                    placeholder="00.0"
+                    value={inputWeight}
+                    onChange={(e) => handleDirectWeightChange(e.target.value)}
+                    onBlur={handleDirectWeightBlur}
+                    onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                    className="wt-input"
+                  />
+                  <span style={{ fontSize: 18, color: "#b7bfcc", fontFamily: "'DM Mono',monospace", marginTop: 8 }}>kg</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInputMode("picker")}
+                  style={{ width: "100%", marginTop: 10, background: "transparent", border: "none", color: "#adb5c4", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  스크롤 피커로 돌아가기
+                </button>
               </div>
             )}
 
             <button
               type="button"
               onClick={() => setShowMemo((v) => !v)}
-              style={{ background: "transparent", border: "none", color: "#a3acbc", fontSize: 12, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5, marginBottom: showMemo ? 10 : 16, padding: 0 }}
+              style={{ background: "transparent", border: "none", color: "#b7bfcc", fontSize: 12, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5, marginBottom: showMemo ? 10 : 16, padding: 0 }}
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d={showMemo ? "M2 8l4-4 4 4" : "M2 4l4 4 4-4"} stroke="#a3acbc" strokeWidth="1.5" strokeLinecap="round" />
+                <path d={showMemo ? "M2 8l4-4 4 4" : "M2 4l4 4 4-4"} stroke="#b7bfcc" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               메모 {showMemo ? "닫기" : "추가"}
             </button>
@@ -572,7 +552,7 @@ export default function App() {
                 placeholder="오늘 컨디션, 메모..."
                 value={inputMemo}
                 onChange={(e) => setInputMemo(e.target.value)}
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, color: "#d2d8e2", fontSize: 13, padding: "10px 14px", width: "100%", fontFamily: "inherit", outline: "none", marginBottom: 16 }}
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, color: "#e1e6ed", fontSize: 13, padding: "10px 14px", width: "100%", fontFamily: "inherit", outline: "none", marginBottom: 16 }}
               />
             )}
 
@@ -586,21 +566,21 @@ export default function App() {
           </div>
 
           <div style={{ padding: "20px 20px 0" }}>
-            <div style={{ fontSize: 11, color: "#8f97a7", letterSpacing: "0.08em", marginBottom: 12 }}>분석</div>
+            <div style={{ fontSize: 11, color: "#a2a9b8", letterSpacing: "0.08em", marginBottom: 12 }}>분석</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
               {statCards.map((s) => (
                 <div key={s.label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 14, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 10, color: "#99a2b3", letterSpacing: "0.06em", marginBottom: 6 }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: "#adb5c4", letterSpacing: "0.06em", marginBottom: 6 }}>{s.label}</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                     <span style={{ fontSize: 22, fontWeight: 500, fontFamily: "'DM Mono',monospace", color: s.color }}>{s.value}</span>
-                    {s.unit && <span style={{ fontSize: 11, color: "#99a2b3" }}>{s.unit}</span>}
+                    {s.unit && <span style={{ fontSize: 11, color: "#adb5c4" }}>{s.unit}</span>}
                   </div>
                 </div>
               ))}
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 11, color: "#8f97a7", letterSpacing: "0.08em" }}>통계</div>
+              <div style={{ fontSize: 11, color: "#a2a9b8", letterSpacing: "0.08em" }}>통계</div>
               <div style={{ display: "flex", gap: 6 }}>
                 {["1M", "3M", "ALL"].map((p) => (
                   <button key={p} className={`period-btn ${period === p ? "on" : ""}`} onClick={() => setPeriod(p)}>
@@ -615,8 +595,8 @@ export default function App() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={graphData} margin={{ top: 8, right: 8, bottom: 0, left: -22 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                    <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 10, fill: "#8f97a7" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                    <YAxis domain={[yMin, yMax]} tick={{ fontSize: 10, fill: "#8f97a7" }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 10, fill: "#a2a9b8" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                    <YAxis domain={[yMin, yMax]} tick={{ fontSize: 10, fill: "#a2a9b8" }} axisLine={false} tickLine={false} />
                     <Tooltip content={<ChartTooltip />} />
                     <Line
                       type="monotone"
@@ -629,18 +609,18 @@ export default function App() {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#7a8394", fontSize: 13 }}>데이터 부족</div>
+                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#8c95a5", fontSize: 13 }}>데이터 부족</div>
               )}
             </div>
           </div>
 
           <div style={{ padding: "20px 20px 0" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 11, color: "#8f97a7", letterSpacing: "0.08em" }}>최근 기록</div>
+              <div style={{ fontSize: 11, color: "#a2a9b8", letterSpacing: "0.08em" }}>최근 기록</div>
               <button
                 type="button"
                 onClick={() => setTab("manage")}
-                style={{ background: "transparent", border: "none", color: "#99a2b3", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ background: "transparent", border: "none", color: "#adb5c4", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
               >
                 전체 보기 →
               </button>
@@ -651,15 +631,15 @@ export default function App() {
               return (
                 <div key={r.id} className="rec-row fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: "#99a2b3" }}>{fmtFull(r.date)}</div>
-                    {r.memo && <div style={{ fontSize: 11, color: "#a3acbc", marginTop: 2 }}>{r.memo}</div>}
+                    <div style={{ fontSize: 12, color: "#adb5c4" }}>{fmtFull(r.date)}</div>
+                    {r.memo && <div style={{ fontSize: 11, color: "#b7bfcc", marginTop: 2 }}>{r.memo}</div>}
                   </div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                     <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 17, fontWeight: 500, color: "#e8ff6e" }}>{r.weight}</span>
-                    <span style={{ fontSize: 11, color: "#99a2b3" }}>kg</span>
+                    <span style={{ fontSize: 11, color: "#adb5c4" }}>kg</span>
                   </div>
                   {d !== null && (
-                    <span style={{ fontSize: 12, color: d < 0 ? "#6ee8c0" : d > 0 ? "#e87a6e" : "#99a2b3", minWidth: 36, textAlign: "right", fontFamily: "'DM Mono',monospace" }}>
+                    <span style={{ fontSize: 12, color: d < 0 ? "#6ee8c0" : d > 0 ? "#e87a6e" : "#adb5c4", minWidth: 36, textAlign: "right", fontFamily: "'DM Mono',monospace" }}>
                       {d > 0 ? "+" : ""}{d}
                     </span>
                   )}
@@ -672,14 +652,14 @@ export default function App() {
 
       {tab === "manage" && (
         <div style={{ padding: "24px 20px 40px" }}>
-          <div style={{ fontSize: 11, color: "#8f97a7", letterSpacing: "0.08em", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: "#a2a9b8", letterSpacing: "0.08em", marginBottom: 16 }}>
             총 {sorted.length}개 기록
           </div>
           {[...sorted].reverse().map((r, i) => (
             <div key={r.id} className="rec-row fade-up" style={{ animationDelay: `${i * 0.03}s` }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, color: "#aeb5c2" }}>{fmtFull(r.date)}</div>
-                {r.memo && <div style={{ fontSize: 11, color: "#99a2b3", marginTop: 2 }}>{r.memo}</div>}
+                <div style={{ fontSize: 13, color: "#c0c7d3" }}>{fmtFull(r.date)}</div>
+                {r.memo && <div style={{ fontSize: 11, color: "#adb5c4", marginTop: 2 }}>{r.memo}</div>}
               </div>
               {editId === r.id ? (
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -703,7 +683,7 @@ export default function App() {
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 17, color: "#e8ff6e", fontWeight: 500 }}>{r.weight}</span>
-                  <span style={{ fontSize: 11, color: "#99a2b3" }}>kg</span>
+                  <span style={{ fontSize: 11, color: "#adb5c4" }}>kg</span>
                   <button type="button" className="ico-btn" onClick={() => { setEditId(r.id); setEditWeight(r.weight.toString()); }}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
                       <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" />
