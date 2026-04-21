@@ -4,7 +4,7 @@ import {
   ResponsiveContainer, CartesianGrid
 } from "recharts";
 
-const STORAGE_KEY = "wt_records_v2";
+const STORAGE_KEY = "wt_records_v3";
 const PICKER_MIN = 30;
 const PICKER_MAX = 200;
 const PICKER_DECIMALS = Array.from({ length: 10 }, (_, i) => i);
@@ -13,22 +13,7 @@ const PICKER_ITEM_HEIGHT = 44;
 const PICKER_VISIBLE_ROWS = 5;
 const PICKER_EDGE_ROWS = Math.floor(PICKER_VISIBLE_ROWS / 2);
 
-const seed = [
-  { id: "s1", date: "2025-03-01", weight: 73.2, memo: "" },
-  { id: "s2", date: "2025-03-05", weight: 72.8, memo: "" },
-  { id: "s3", date: "2025-03-10", weight: 72.5, memo: "" },
-  { id: "s4", date: "2025-03-15", weight: 72.1, memo: "" },
-  { id: "s5", date: "2025-03-19", weight: 71.9, memo: "" },
-  { id: "s6", date: "2025-03-24", weight: 71.5, memo: "" },
-  { id: "s7", date: "2025-03-28", weight: 71.8, memo: "" },
-  { id: "s8", date: "2025-04-01", weight: 71.2, memo: "" },
-  { id: "s9", date: "2025-04-05", weight: 70.9, memo: "" },
-  { id: "s10", date: "2025-04-08", weight: 70.6, memo: "" },
-  { id: "s11", date: "2025-04-12", weight: 70.4, memo: "" },
-  { id: "s12", date: "2025-04-15", weight: 70.7, memo: "" },
-  { id: "s13", date: "2025-04-18", weight: 70.2, memo: "" },
-  { id: "s14", date: "2025-04-21", weight: 69.9, memo: "" },
-];
+const seed = [];
 
 function todayStr() {
   const d = new Date();
@@ -325,11 +310,27 @@ export default function App() {
       cutoff = new Date(now);
       cutoff.setMonth(cutoff.getMonth() - 3);
     }
-    return cutoff ? sorted.filter((r) => new Date(r.date) >= cutoff) : sorted;
+    if (!cutoff) return sorted;
+    const filtered = sorted.filter((r) => new Date(r.date) >= cutoff);
+    return filtered.length ? filtered : sorted;
   })();
 
-  const yMin = graphData.length ? Math.floor(Math.min(...graphData.map((r) => r.weight)) - 0.5) : 60;
-  const yMax = graphData.length ? Math.ceil(Math.max(...graphData.map((r) => r.weight)) + 0.5) : 80;
+  const yTicks = (() => {
+    if (!graphData.length) return [60, 65, 70, 75, 80];
+    const minWeight = Math.min(...graphData.map((r) => r.weight));
+    const maxWeight = Math.max(...graphData.map((r) => r.weight));
+    let start = Math.floor((minWeight - 0.5) / 5) * 5;
+    let end = Math.ceil((maxWeight + 0.5) / 5) * 5;
+    if (start === end) {
+      start -= 5;
+      end += 5;
+    }
+    const ticks = [];
+    for (let v = start; v <= end; v += 5) ticks.push(v);
+    return ticks;
+  })();
+  const yMin = yTicks[0];
+  const yMax = yTicks[yTicks.length - 1];
 
   function setPickerWeight(integer, decimal) {
     const nextWeight = `${integer}.${decimal}`;
@@ -475,41 +476,39 @@ export default function App() {
               </button>
             </div>
 
-            {inputMode === "picker" ? (
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
-                  <WheelPicker
-                    items={PICKER_INTEGERS}
-                    value={pickerInt}
-                    onChange={(nextInt) => setPickerWeight(nextInt, pickerDec)}
-                    format={(item) => String(item)}
-                    width={132}
-                    ariaLabel="체중 정수부 선택"
-                  />
-                  <div style={{ fontSize: 34, color: "#e8ff6e", fontFamily: "'DM Mono',monospace", marginTop: -2 }}>.</div>
-                  <WheelPicker
-                    items={PICKER_DECIMALS}
-                    value={pickerDec}
-                    onChange={(nextDec) => setPickerWeight(pickerInt, nextDec)}
-                    format={(item) => String(item)}
-                    width={88}
-                    ariaLabel="체중 소수부 선택"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setInputMode("direct")}
-                  aria-label="숫자 직접 입력으로 전환"
-                  title="숫자 직접 입력"
-                  style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, cursor: "pointer", padding: 0 }}
-                >
-                  <span style={{ fontSize: 34, fontWeight: 500, fontFamily: "'DM Mono',monospace", color: "#e8ff6e" }}>{inputWeight}</span>
-                  <span style={{ fontSize: 13, color: "#b7bfcc" }}>kg</span>
-                </button>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                <WheelPicker
+                  items={PICKER_INTEGERS}
+                  value={pickerInt}
+                  onChange={(nextInt) => setPickerWeight(nextInt, pickerDec)}
+                  format={(item) => String(item)}
+                  width={132}
+                  ariaLabel="체중 정수부 선택"
+                />
+                <div style={{ fontSize: 34, color: "#e8ff6e", fontFamily: "'DM Mono',monospace", marginTop: -2 }}>.</div>
+                <WheelPicker
+                  items={PICKER_DECIMALS}
+                  value={pickerDec}
+                  onChange={(nextDec) => setPickerWeight(pickerInt, nextDec)}
+                  format={(item) => String(item)}
+                  width={88}
+                  ariaLabel="체중 소수부 선택"
+                />
               </div>
-            ) : (
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+              <button
+                type="button"
+                onClick={() => setInputMode("direct")}
+                aria-label="숫자 직접 입력으로 전환"
+                title="숫자 직접 입력"
+                style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, cursor: "pointer", padding: 0 }}
+              >
+                <span style={{ fontSize: 34, fontWeight: 500, fontFamily: "'DM Mono',monospace", color: "#e8ff6e" }}>{inputWeight}</span>
+                <span style={{ fontSize: 13, color: "#b7bfcc" }}>kg</span>
+              </button>
+
+              {inputMode === "direct" && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 10 }}>
                   <input
                     ref={weightRef}
                     type="number"
@@ -525,15 +524,8 @@ export default function App() {
                   />
                   <span style={{ fontSize: 18, color: "#b7bfcc", fontFamily: "'DM Mono',monospace", marginTop: 8 }}>kg</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setInputMode("picker")}
-                  style={{ width: "100%", marginTop: 10, background: "transparent", border: "none", color: "#adb5c4", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
-                >
-                  스크롤 피커로 돌아가기
-                </button>
-              </div>
-            )}
+              )}
+            </div>
 
             <button
               type="button"
@@ -591,12 +583,12 @@ export default function App() {
             </div>
 
             <div style={{ height: 200, marginBottom: 8 }}>
-              {graphData.length > 1 ? (
+              {graphData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={graphData} margin={{ top: 8, right: 8, bottom: 0, left: -22 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                     <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 10, fill: "#a2a9b8" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                    <YAxis domain={[yMin, yMax]} tick={{ fontSize: 10, fill: "#a2a9b8" }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[yMin, yMax]} ticks={yTicks} allowDecimals={false} tick={{ fontSize: 10, fill: "#a2a9b8" }} axisLine={false} tickLine={false} />
                     <Tooltip content={<ChartTooltip />} />
                     <Line
                       type="monotone"
