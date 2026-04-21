@@ -76,7 +76,7 @@ const CustomDot = (props) => {
   return <circle cx={cx} cy={cy} r={3} fill="#3a3d2a" stroke="#e8ff6e" strokeWidth={1} />;
 };
 
-const ChartTooltip = ({ active, payload }) => {
+const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "#1a1d24", border: "1px solid rgba(232,255,110,0.2)", borderRadius: 8, padding: "8px 14px" }}>
