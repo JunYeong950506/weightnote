@@ -441,8 +441,8 @@ export default function App() {
         .period-btn{background:rgba(255,255,255,0.55);border:1px solid #cfe3e9;border-radius:20px;padding:6px 16px;font-size:14px;color:#587282;cursor:pointer;transition:all 0.15s;font-family:inherit;font-weight:500;}
         .period-btn.on{background:linear-gradient(135deg,#1ec9d8,#0ab4c5);border-color:#0ab4c5;color:#f7fdff;box-shadow:0 8px 18px rgba(17,170,190,0.22);}
         .tab-pill{flex:1;background:transparent;border:none;padding:12px 0;font-size:16px;cursor:pointer;font-family:inherit;transition:all 0.2s;border-radius:10px;}
-        .tab-pill.on{background:#ffffff;color:#173140;font-weight:600;box-shadow:0 8px 20px rgba(28,103,128,0.14);}
-        .tab-pill.off{color:#546f80;font-weight:500;}
+        .tab-pill.on{background:linear-gradient(180deg,#edfafd 0%,#e3f5fa 100%);color:#0d4b5d;font-weight:700;box-shadow:inset 0 0 0 1px rgba(12,176,196,0.2),0 8px 20px rgba(28,103,128,0.12);}
+        .tab-pill.off{color:#597485;font-weight:500;}
         .wt-input{background:transparent;border:none;font-size:54px;font-family:'Manrope','Pretendard','Noto Sans KR',sans-serif;font-weight:600;color:#0ab3c4;text-align:center;width:160px;outline:none;caret-color:#0ab3c4;padding:0;}
         .wt-input::placeholder{color:#95b8bf;}
         .save-btn{width:100%;border:none;border-radius:16px;padding:17px;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.25s;letter-spacing:0.02em;}
@@ -463,8 +463,8 @@ export default function App() {
         .fade-up{animation:fadeUp 0.3s ease both;}
       `}</style>
 
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(236,247,250,0.88)", backdropFilter: "blur(20px)", padding: "12px 20px 8px", borderBottom: "1px solid #d9ebf0" }}>
-        <div style={{ display: "flex", background: "rgba(255,255,255,0.65)", borderRadius: 12, padding: 3, gap: 2, boxShadow: "inset 0 0 0 1px #d8eaf0" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(236,247,250,0.92)", backdropFilter: "blur(20px)", padding: "12px 20px 8px", borderBottom: "1px solid #d9ebf0" }}>
+        <div style={{ display: "flex", background: "rgba(255,255,255,0.75)", borderRadius: 14, padding: 4, gap: 3, boxShadow: "inset 0 0 0 1px #d2e8ee" }}>
           <button className={`tab-pill ${tab === "main" ? "on" : "off"}`} onClick={() => setTab("main")}>체중 기록</button>
           <button className={`tab-pill ${tab === "manage" ? "on" : "off"}`} onClick={() => setTab("manage")}>기록 관리</button>
         </div>
@@ -557,7 +557,7 @@ export default function App() {
           </div>
 
           <div style={{ padding: "20px 20px 0" }}>
-            <div style={{ fontSize: 14, color: "#546f80", letterSpacing: "0.08em", marginBottom: 12, fontWeight: 600 }}>분석</div>
+            <div style={{ fontSize: 14, color: "#3f5a6b", letterSpacing: "0.08em", marginBottom: 12, fontWeight: 800 }}>분석</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
               {statCards.map((s) => (
                 <div key={s.label} style={{ background: "#ffffff", border: "1px solid #d9ebf0", borderRadius: 16, padding: "14px 16px", boxShadow: "0 10px 20px rgba(33,108,131,0.08)" }}>
@@ -571,7 +571,7 @@ export default function App() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, color: "#546f80", letterSpacing: "0.08em", fontWeight: 600 }}>통계</div>
+              <div style={{ fontSize: 14, color: "#3f5a6b", letterSpacing: "0.08em", fontWeight: 800 }}>통계</div>
               <div style={{ display: "flex", gap: 6 }}>
                 {["1M", "3M", "ALL"].map((p) => (
                   <button key={p} className={`period-btn ${period === p ? "on" : ""}`} onClick={() => setPeriod(p)}>
@@ -581,7 +581,7 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ height: 200, marginBottom: 8 }}>
+            <div style={{ height: 220, marginBottom: 8, background: "#f7fdff", border: "1px solid #d4e9ee", borderRadius: 16, padding: "10px 8px 4px" }}>
               {graphData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={graphData} margin={{ top: 8, right: 8, bottom: 0, left: -22 }}>
@@ -607,7 +607,7 @@ export default function App() {
 
           <div style={{ padding: "20px 20px 0" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, color: "#546f80", letterSpacing: "0.08em", fontWeight: 600 }}>최근 기록</div>
+              <div style={{ fontSize: 14, color: "#3f5a6b", letterSpacing: "0.08em", fontWeight: 800 }}>최근 기록</div>
               <button
                 type="button"
                 onClick={() => setTab("manage")}
@@ -619,6 +619,8 @@ export default function App() {
             {[...sorted].reverse().slice(0, 5).map((r, i) => {
               const p = sorted[sorted.indexOf(r) - 1];
               const d = p ? +(r.weight - p.weight).toFixed(1) : null;
+              const diffText = d === null ? "\u00A0" : `${d > 0 ? "+" : ""}${d}`;
+              const diffColor = d === null ? "transparent" : d < 0 ? "#1bc6a7" : d > 0 ? "#ff7398" : "#607c8d";
               return (
                 <div key={r.id} className="rec-row fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
                   <div style={{ flex: 1 }}>
@@ -629,11 +631,9 @@ export default function App() {
                     <span style={{ fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontSize: 31, fontWeight: 600, color: "#078ea3" }}>{r.weight}</span>
                     <span style={{ fontSize: 15, color: "#4d6878", fontWeight: 500 }}>kg</span>
                   </div>
-                  {d !== null && (
-                    <span style={{ fontSize: 15, color: d < 0 ? "#1bc6a7" : d > 0 ? "#ff7398" : "#607c8d", minWidth: 40, textAlign: "right", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontWeight: 500 }}>
-                      {d > 0 ? "+" : ""}{d}
-                    </span>
-                  )}
+                  <span style={{ fontSize: 19, color: diffColor, minWidth: 52, textAlign: "right", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontWeight: 600 }}>
+                    {diffText}
+                  </span>
                 </div>
               );
             })}
