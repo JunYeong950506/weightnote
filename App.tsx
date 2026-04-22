@@ -78,16 +78,39 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
   const userScrollRef = useRef(false);
   const scrollTimerRef = useRef(null);
   const didInitRef = useRef(false);
+  const [previewValue, setPreviewValue] = useState(value);
+
+  function resolveNearest(scrollTop) {
+    const index = Math.max(
+      0,
+      Math.min(items.length - 1, Math.round(scrollTop / PICKER_ITEM_HEIGHT))
+    );
+    return { index, nextValue: items[index] };
+  }
+
+  function commitValue({ snap = true } = {}) {
+    const el = pickerRef.current;
+    if (!el) return;
+    const { index, nextValue } = resolveNearest(el.scrollTop);
+    const targetTop = index * PICKER_ITEM_HEIGHT;
+    if (snap && Math.abs(el.scrollTop - targetTop) > 0.5) {
+      el.scrollTo({ top: targetTop, behavior: "smooth" });
+    }
+    setPreviewValue(nextValue);
+    if (nextValue !== value) onChange(nextValue);
+  }
 
   useEffect(() => {
     const el = pickerRef.current;
     const index = items.indexOf(value);
     if (!el || index < 0) return;
+    setPreviewValue(value);
+    if (userScrollRef.current) return;
     const targetTop = index * PICKER_ITEM_HEIGHT;
     if (Math.abs(el.scrollTop - targetTop) < 1) return;
     el.scrollTo({
       top: targetTop,
-      behavior: userScrollRef.current ? "auto" : (didInitRef.current ? "smooth" : "auto")
+      behavior: didInitRef.current ? "smooth" : "auto"
     });
     didInitRef.current = true;
   }, [items, value]);
@@ -96,16 +119,13 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
 
   function handleScroll(event) {
     userScrollRef.current = true;
+    const { nextValue } = resolveNearest(event.currentTarget.scrollTop);
+    if (nextValue !== previewValue) setPreviewValue(nextValue);
     clearTimeout(scrollTimerRef.current);
     scrollTimerRef.current = setTimeout(() => {
       userScrollRef.current = false;
+      commitValue();
     }, 120);
-    const nextIndex = Math.max(
-      0,
-      Math.min(items.length - 1, Math.round(event.currentTarget.scrollTop / PICKER_ITEM_HEIGHT))
-    );
-    const nextValue = items[nextIndex];
-    if (nextValue !== value) onChange(nextValue);
   }
 
   return (
@@ -114,11 +134,11 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
         position: "relative",
         width,
         height: PICKER_ITEM_HEIGHT * PICKER_VISIBLE_ROWS,
-        borderRadius: 20,
-        background: "linear-gradient(180deg,#fcfeff 0%,#f2fbfd 100%)",
-        border: "1px solid #d4eaee",
+        borderRadius: 24,
+        background: "transparent",
+        border: "none",
         overflow: "hidden",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
+        boxShadow: "none",
       }}
     >
       <div
@@ -138,19 +158,22 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
           <div key={`top-${idx}`} style={{ height: PICKER_ITEM_HEIGHT, pointerEvents: "none" }} />
         ))}
         {items.map((item) => {
-          const isSelected = item === value;
+          const isSelected = item === previewValue;
           return (
             <button
               key={item}
               type="button"
-              onClick={() => onChange(item)}
+              onClick={() => {
+                setPreviewValue(item);
+                if (item !== value) onChange(item);
+              }}
               style={{
                 height: PICKER_ITEM_HEIGHT,
                 width: "100%",
                 scrollSnapAlign: "center",
                 background: "transparent",
                 border: "none",
-                color: isSelected ? "#078ea3" : "#6e8697",
+                color: isSelected ? "#056f81" : "#6e8697",
                 fontSize: isSelected ? 40 : 31,
                 fontWeight: isSelected ? 600 : 500,
                 fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif",
@@ -172,20 +195,22 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background: "linear-gradient(180deg, rgba(236,246,249,0.96) 0%, rgba(236,246,249,0.45) 18%, rgba(236,246,249,0) 36%, rgba(236,246,249,0) 64%, rgba(236,246,249,0.45) 82%, rgba(236,246,249,0.96) 100%)",
+          background: "linear-gradient(180deg, rgba(230,243,247,0.9) 0%, rgba(230,243,247,0.4) 18%, rgba(230,243,247,0) 34%, rgba(230,243,247,0) 66%, rgba(230,243,247,0.4) 82%, rgba(230,243,247,0.9) 100%)",
         }}
       />
       <div
         style={{
           position: "absolute",
-          left: 10,
-          right: 10,
+          left: 4,
+          right: 4,
           top: "50%",
           height: PICKER_ITEM_HEIGHT,
           transform: "translateY(-50%)",
-          borderTop: "1px solid rgba(16,197,217,0.38)",
-          borderBottom: "1px solid rgba(16,197,217,0.38)",
-          background: "rgba(16,197,217,0.07)",
+          borderTop: "2px solid rgba(7,142,163,0.62)",
+          borderBottom: "2px solid rgba(7,142,163,0.62)",
+          background: "rgba(7,142,163,0.15)",
+          boxShadow: "inset 0 0 0 1px rgba(7,142,163,0.24), 0 0 12px rgba(9,175,193,0.2)",
+          borderRadius: 10,
           pointerEvents: "none",
         }}
       />
@@ -466,22 +491,22 @@ export default function App() {
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 14, padding: "0 2px" }}>
                 <WheelPicker
                   items={PICKER_INTEGERS}
                   value={pickerInt}
                   onChange={(nextInt) => setPickerWeight(nextInt, pickerDec)}
                   format={(item) => String(item)}
-                  width={132}
+                  width={172}
                   ariaLabel="체중 정수부 선택"
                 />
-                <div style={{ fontSize: 40, color: "#078ea3", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", marginTop: -2 }}>.</div>
+                <div style={{ fontSize: 46, color: "#078ea3", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", marginTop: -3 }}>.</div>
                 <WheelPicker
                   items={PICKER_DECIMALS}
                   value={pickerDec}
                   onChange={(nextDec) => setPickerWeight(pickerInt, nextDec)}
                   format={(item) => String(item)}
-                  width={88}
+                  width={126}
                   ariaLabel="체중 소수부 선택"
                 />
               </div>
