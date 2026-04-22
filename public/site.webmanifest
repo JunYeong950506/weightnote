@@ -3,8 +3,8 @@
   "short_name": "WeightNote",
   "display": "standalone",
   "start_url": "/",
-  "background_color": "#0c0e14",
-  "theme_color": "#0c0e14",
+  "background_color": "#e6f3f7",
+  "theme_color": "#0ab4c5",
   "icons": [
     {
       "src": "/icons/icon-192.png",
