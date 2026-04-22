@@ -91,13 +91,17 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }: Wheel
   const pickerRef = useRef<HTMLDivElement>(null);
   const userScrollRef = useRef(false);
   const scrollTimerRef = useRef<any>(null);
+  const programmaticTimerRef = useRef<any>(null);
+  const isProgrammaticScrollRef = useRef(false);
   const didInitRef = useRef(false);
   const [previewValue, setPreviewValue] = useState(value);
 
   function resolveNearest(scrollTop: number) {
+    const maxTop = (items.length - 1) * PICKER_ITEM_HEIGHT;
+    const boundedTop = Math.max(0, Math.min(maxTop, scrollTop));
     const index = Math.max(
       0,
-      Math.min(items.length - 1, Math.round(scrollTop / PICKER_ITEM_HEIGHT))
+      Math.min(items.length - 1, Math.round(boundedTop / PICKER_ITEM_HEIGHT))
     );
     return { index, nextValue: items[index] };
   }
@@ -117,21 +121,34 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }: Wheel
   useEffect(() => {
     const el = pickerRef.current;
     const index = items.indexOf(value);
+    clearTimeout(scrollTimerRef.current);
+    clearTimeout(programmaticTimerRef.current);
+    userScrollRef.current = false;
     if (!el || index < 0) return;
     setPreviewValue(value);
-    if (userScrollRef.current) return;
     const targetTop = index * PICKER_ITEM_HEIGHT;
-    if (Math.abs(el.scrollTop - targetTop) < 1) return;
+    if (Math.abs(el.scrollTop - targetTop) < 1) {
+      isProgrammaticScrollRef.current = false;
+      return;
+    }
+    isProgrammaticScrollRef.current = true;
     el.scrollTo({
       top: targetTop,
       behavior: didInitRef.current ? "smooth" : "auto"
     });
+    programmaticTimerRef.current = setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, didInitRef.current ? 300 : 40);
     didInitRef.current = true;
   }, [items, value]);
 
-  useEffect(() => () => clearTimeout(scrollTimerRef.current), []);
+  useEffect(() => () => {
+    clearTimeout(scrollTimerRef.current);
+    clearTimeout(programmaticTimerRef.current);
+  }, []);
 
   function handleScroll(event: React.UIEvent<HTMLDivElement>) {
+    if (isProgrammaticScrollRef.current) return;
     userScrollRef.current = true;
     const { nextValue } = resolveNearest(event.currentTarget.scrollTop);
     if (nextValue !== previewValue) setPreviewValue(nextValue);
@@ -139,7 +156,7 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }: Wheel
     scrollTimerRef.current = setTimeout(() => {
       userScrollRef.current = false;
       commitValue();
-    }, 120);
+    }, 170);
   }
 
   return (
