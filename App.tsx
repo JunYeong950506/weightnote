@@ -82,10 +82,13 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
   useEffect(() => {
     const el = pickerRef.current;
     const index = items.indexOf(value);
-    if (!el || index < 0 || userScrollRef.current) return;
+    if (!el || index < 0) return;
     const targetTop = index * PICKER_ITEM_HEIGHT;
     if (Math.abs(el.scrollTop - targetTop) < 1) return;
-    el.scrollTo({ top: targetTop, behavior: didInitRef.current ? "smooth" : "auto" });
+    el.scrollTo({
+      top: targetTop,
+      behavior: userScrollRef.current ? "auto" : (didInitRef.current ? "smooth" : "auto")
+    });
     didInitRef.current = true;
   }, [items, value]);
 
