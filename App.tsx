@@ -66,7 +66,7 @@ const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) =>
   return (
     <div style={{ background: "#ffffff", border: "1px solid rgba(14,172,190,0.24)", borderRadius: 10, padding: "8px 14px", boxShadow: "0 10px 24px rgba(26,77,99,0.12)" }}>
       <div style={{ fontSize: 13, color: "#4f6677", marginBottom: 3 }}>{fmtKo(payload[0].payload.date)}</div>
-      <div style={{ fontSize: 24, fontWeight: 600, fontFamily: "'DM Mono',monospace", color: "#089eb3" }}>
+      <div style={{ fontSize: 24, fontWeight: 600, fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", color: "#089eb3" }}>
         {payload[0].value}<span style={{ fontSize: 13, color: "#4f6677", marginLeft: 4 }}>kg</span>
       </div>
     </div>
@@ -153,7 +153,7 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
                 color: isSelected ? "#078ea3" : "#6e8697",
                 fontSize: isSelected ? 40 : 31,
                 fontWeight: isSelected ? 600 : 500,
-                fontFamily: "'DM Mono',monospace",
+                fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif",
                 cursor: "pointer",
                 transition: "all 0.16s ease",
               }}
@@ -404,7 +404,7 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(180deg,#eef8fb 0%,#e6f3f7 100%)", color: "#183140", fontFamily: "'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif", maxWidth: 430, margin: "0 auto" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         html{background:#e6f3f7;-webkit-text-size-adjust:108%;text-size-adjust:108%;}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
@@ -418,7 +418,7 @@ export default function App() {
         .tab-pill{flex:1;background:transparent;border:none;padding:12px 0;font-size:16px;cursor:pointer;font-family:inherit;transition:all 0.2s;border-radius:10px;}
         .tab-pill.on{background:#ffffff;color:#173140;font-weight:600;box-shadow:0 8px 20px rgba(28,103,128,0.14);}
         .tab-pill.off{color:#546f80;font-weight:500;}
-        .wt-input{background:transparent;border:none;font-size:54px;font-family:'DM Mono',monospace;font-weight:500;color:#0ab3c4;text-align:center;width:160px;outline:none;caret-color:#0ab3c4;padding:0;}
+        .wt-input{background:transparent;border:none;font-size:54px;font-family:'Manrope','Pretendard','Noto Sans KR',sans-serif;font-weight:600;color:#0ab3c4;text-align:center;width:160px;outline:none;caret-color:#0ab3c4;padding:0;}
         .wt-input::placeholder{color:#95b8bf;}
         .save-btn{width:100%;border:none;border-radius:16px;padding:17px;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.25s;letter-spacing:0.02em;}
         .save-btn.ready{background:linear-gradient(135deg,#1fcbd9,#09b0c1);color:#f7fdff;box-shadow:0 10px 20px rgba(17,170,190,0.24);}
@@ -429,7 +429,7 @@ export default function App() {
         .rec-row:last-child{border-bottom:none;}
         .ico-btn{background:transparent;border:none;cursor:pointer;color:#5f7989;padding:5px 7px;font-size:16px;transition:color 0.15s;line-height:1;}
         .ico-btn:hover{color:#406579;}
-        .edit-inp{background:#f4fcfe;border:1px solid rgba(12,176,196,0.45);border-radius:8px;color:#089eb3;font-size:19px;font-family:'DM Mono',monospace;width:92px;padding:6px 9px;text-align:right;outline:none;}
+        .edit-inp{background:#f4fcfe;border:1px solid rgba(12,176,196,0.45);border-radius:8px;color:#089eb3;font-size:19px;font-family:'Manrope','Pretendard','Noto Sans KR',sans-serif;width:92px;padding:6px 9px;text-align:right;outline:none;}
         .del-confirm{display:flex;gap:6px;align-items:center;}
         .del-yes{background:#ffeef4;border:1px solid rgba(255,108,158,0.34);border-radius:8px;color:#d14678;font-size:14px;padding:6px 10px;cursor:pointer;font-family:inherit;}
         .del-no{background:#f4fbfe;border:1px solid #d9eaf0;border-radius:8px;color:#5e7888;font-size:14px;padding:6px 10px;cursor:pointer;font-family:inherit;}
@@ -475,7 +475,7 @@ export default function App() {
                   width={132}
                   ariaLabel="체중 정수부 선택"
                 />
-                <div style={{ fontSize: 40, color: "#078ea3", fontFamily: "'DM Mono',monospace", marginTop: -2 }}>.</div>
+                <div style={{ fontSize: 40, color: "#078ea3", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", marginTop: -2 }}>.</div>
                 <WheelPicker
                   items={PICKER_DECIMALS}
                   value={pickerDec}
@@ -488,7 +488,7 @@ export default function App() {
               <div
                 style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, padding: 0 }}
               >
-                <span style={{ fontSize: 48, fontWeight: 600, fontFamily: "'DM Mono',monospace", color: "#078ea3" }}>{inputWeight}</span>
+                <span style={{ fontSize: 48, fontWeight: 600, fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", color: "#078ea3" }}>{inputWeight}</span>
                 <span style={{ fontSize: 24, color: "#4f6777", fontWeight: 500 }}>kg</span>
               </div>
             </div>
@@ -538,7 +538,7 @@ export default function App() {
                 <div key={s.label} style={{ background: "#ffffff", border: "1px solid #d9ebf0", borderRadius: 16, padding: "14px 16px", boxShadow: "0 10px 20px rgba(33,108,131,0.08)" }}>
                   <div style={{ fontSize: 13, color: "#5f7a8a", letterSpacing: "0.04em", marginBottom: 8, fontWeight: 500 }}>{s.label}</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                    <span style={{ fontSize: 34, fontWeight: 600, fontFamily: "'DM Mono',monospace", color: s.color }}>{s.value}</span>
+                    <span style={{ fontSize: 34, fontWeight: 600, fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", color: s.color }}>{s.value}</span>
                     {s.unit && <span style={{ fontSize: 17, color: "#5f7a8a", fontWeight: 500 }}>{s.unit}</span>}
                   </div>
                 </div>
@@ -601,11 +601,11 @@ export default function App() {
                     {r.memo && <div style={{ fontSize: 14, color: "#587484", marginTop: 3 }}>{r.memo}</div>}
                   </div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                    <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 31, fontWeight: 600, color: "#078ea3" }}>{r.weight}</span>
+                    <span style={{ fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontSize: 31, fontWeight: 600, color: "#078ea3" }}>{r.weight}</span>
                     <span style={{ fontSize: 15, color: "#4d6878", fontWeight: 500 }}>kg</span>
                   </div>
                   {d !== null && (
-                    <span style={{ fontSize: 15, color: d < 0 ? "#1bc6a7" : d > 0 ? "#ff7398" : "#607c8d", minWidth: 40, textAlign: "right", fontFamily: "'DM Mono',monospace", fontWeight: 500 }}>
+                    <span style={{ fontSize: 15, color: d < 0 ? "#1bc6a7" : d > 0 ? "#ff7398" : "#607c8d", minWidth: 40, textAlign: "right", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontWeight: 500 }}>
                       {d > 0 ? "+" : ""}{d}
                     </span>
                   )}
@@ -648,7 +648,7 @@ export default function App() {
                 </div>
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 30, color: "#078ea3", fontWeight: 600 }}>{r.weight}</span>
+                  <span style={{ fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontSize: 30, color: "#078ea3", fontWeight: 600 }}>{r.weight}</span>
                   <span style={{ fontSize: 15, color: "#4d6878", fontWeight: 500 }}>kg</span>
                   <button type="button" className="ico-btn" onClick={() => { setEditId(r.id); setEditWeight(r.weight.toString()); }}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
