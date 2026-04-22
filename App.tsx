@@ -187,8 +187,13 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }: Wheel
                 height: PICKER_ITEM_HEIGHT,
                 width: "100%",
                 scrollSnapAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 background: "transparent",
                 border: "none",
+                padding: 0,
+                lineHeight: 1,
                 color: isSelected ? "#0fbcc9" : "#999999",
                 fontSize: isSelected ? 42 : 32,
                 fontWeight: isSelected ? 700 : 500,
@@ -403,10 +408,10 @@ export default function App() {
       label: "주간 변화",
       value: weeklyChange !== null ? (weeklyChange > 0 ? `+${weeklyChange}` : `${weeklyChange}`) : "—",
       unit: weeklyChange !== null ? "kg" : "",
-      color: weeklyChange === null ? "#999999" : weeklyChange < 0 ? "#0fbcc9" : weeklyChange > 0 ? "#ff5252" : "#747474"
+      color: weeklyChange === null ? "#999999" : weeklyChange < 0 ? "#1fa971" : weeklyChange > 0 ? "#ff5252" : "#747474"
     },
     { label: "최고", value: maxW ?? "—", unit: maxW ? "kg" : "", color: "#ff5252" },
-    { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#0fbcc9" },
+    { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#1fa971" },
   ];
 
   return (
@@ -594,7 +599,7 @@ export default function App() {
                 const p = sorted[sorted.indexOf(r) - 1];
                 const d = p ? +(r.weight - p.weight).toFixed(1) : null;
                 const diffText = d === null ? "\u00A0" : `${d > 0 ? "+" : ""}${d}`;
-                const diffColor = d === null ? "transparent" : d < 0 ? "#0fbcc9" : d > 0 ? "#ff5252" : "#888888";
+                const diffColor = d === null ? "transparent" : d < 0 ? "#1fa971" : d > 0 ? "#ff5252" : "#888888";
                 return (
                   <div key={r.id} className="rec-row">
                     <div style={{ flex: 1 }}>
