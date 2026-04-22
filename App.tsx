@@ -593,7 +593,7 @@ export default function App() {
               {[...sorted].reverse().slice(0, 5).map((r: any, i) => {
                 const p = sorted[sorted.indexOf(r) - 1];
                 const d = p ? +(r.weight - p.weight).toFixed(1) : null;
-                const diffText = d === null ? "" : `${d > 0 ? "+" : ""}${d}`;
+                const diffText = d === null ? "\u00A0" : `${d > 0 ? "+" : ""}${d}`;
                 const diffColor = d === null ? "transparent" : d < 0 ? "#0fbcc9" : d > 0 ? "#ff5252" : "#888888";
                 return (
                   <div key={r.id} className="rec-row">
@@ -601,15 +601,22 @@ export default function App() {
                       <div style={{ fontSize: 16, color: "#000000", fontWeight: 600 }}>{fmtFull(r.date)}</div>
                       {r.memo && <div style={{ fontSize: 14, color: "#777777", marginTop: 2, fontWeight: 500 }}>{r.memo}</div>}
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: 4, justifyContent: "flex-end" }}>
-                        <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 26, fontWeight: 700, color: "#000000" }}>{r.weight}</span>
-                        <span style={{ fontSize: 15, color: "#888888", fontWeight: 600 }}>kg</span>
-                      </div>
-                      <span style={{ fontSize: 14, color: diffColor, fontFamily: "'Manrope',sans-serif", fontWeight: 700 }}>
-                        {diffText}
-                      </span>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginLeft: 8 }}>
+                      <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 26, fontWeight: 700, color: "#000000" }}>{r.weight}</span>
+                      <span style={{ fontSize: 15, color: "#888888", fontWeight: 600 }}>kg</span>
                     </div>
+                    <span
+                      style={{
+                        minWidth: 48,
+                        textAlign: "right",
+                        fontSize: 19,
+                        color: diffColor,
+                        fontFamily: "'Manrope',sans-serif",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {diffText}
+                    </span>
                   </div>
                 );
               })}
