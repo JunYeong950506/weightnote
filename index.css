@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+body {
+  -webkit-tap-highlight-color: transparent;
+  background-color: #f7f8f9;
+}
+
+:root {
+  --font-sans: "Inter", "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Manrope", var(--font-sans);
+  --samsung-teal: #0fbcc9;
+  --samsung-teal-dark: #0896a1;
+  --samsung-teal-light: #e6f7f8;
+  --samsung-bg: #f7f8f9;
+}

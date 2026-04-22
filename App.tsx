@@ -1,4 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect, useRef } from "react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid
@@ -13,74 +18,83 @@ const PICKER_ITEM_HEIGHT = 50;
 const PICKER_VISIBLE_ROWS = 5;
 const PICKER_EDGE_ROWS = Math.floor(PICKER_VISIBLE_ROWS / 2);
 
-const seed = [];
+const seed: any[] = [];
 
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function fmtShort(dateStr) {
+function fmtShort(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-function fmtKo(dateStr) {
+function fmtKo(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
-function fmtFull(dateStr) {
+function fmtFull(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, "0")}. ${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function clampWeight(value) {
+function clampWeight(value: string | number | null) {
   if (value === "" || value === null || Number.isNaN(Number(value))) return "";
   const clamped = Math.min(PICKER_MAX + 0.9, Math.max(PICKER_MIN, Number(value)));
   return clamped.toFixed(1);
 }
 
-function weightToParts(value) {
+function weightToParts(value: string | number | null) {
   const normalized = clampWeight(value);
   if (!normalized) return { integer: 70, decimal: 0 };
   const [integer, decimal] = normalized.split(".");
   return { integer: Number(integer), decimal: Number(decimal) };
 }
 
-function latestWeightString(records) {
+function latestWeightString(records: any[]) {
   const latestRecord = [...records].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
   return latestRecord ? clampWeight(latestRecord.weight) : "70.0";
 }
 
-const CustomDot = (props) => {
+const CustomDot = (props: any) => {
   const { cx, cy, payload, latest } = props;
   if (payload.date === latest) {
-    return <circle cx={cx} cy={cy} r={5} fill="#0fbfd1" stroke="#ffffff" strokeWidth={2} />;
+    return <circle cx={cx} cy={cy} r={5} fill="#0fbcc9" stroke="#ffffff" strokeWidth={2} />;
   }
-  return <circle cx={cx} cy={cy} r={3} fill="#dff5f8" stroke="#0fbfd1" strokeWidth={1.4} />;
+  return <circle cx={cx} cy={cy} r={3} fill="#e6f7f8" stroke="#0fbcc9" strokeWidth={1.4} />;
 };
 
 const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: "#ffffff", border: "1px solid rgba(14,172,190,0.24)", borderRadius: 10, padding: "8px 14px", boxShadow: "0 10px 24px rgba(26,77,99,0.12)" }}>
-      <div style={{ fontSize: 13, color: "#4f6677", marginBottom: 3 }}>{fmtKo(payload[0].payload.date)}</div>
-      <div style={{ fontSize: 24, fontWeight: 600, fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", color: "#089eb3" }}>
-        {payload[0].value}<span style={{ fontSize: 13, color: "#4f6677", marginLeft: 4 }}>kg</span>
+    <div style={{ background: "#ffffff", border: "1px solid rgba(15,188,201,0.15)", borderRadius: 14, padding: "10px 16px", boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}>
+      <div style={{ fontSize: 13, color: "#666666", marginBottom: 4, fontWeight: 500 }}>{fmtKo(payload[0].payload.date)}</div>
+      <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'Manrope','Pretendard',sans-serif", color: "#0fbcc9" }}>
+        {payload[0].value}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
       </div>
     </div>
   );
 };
 
-function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
-  const pickerRef = useRef(null);
+interface WheelPickerProps {
+  items: number[];
+  value: number;
+  onChange: (val: number) => void;
+  format: (item: number) => string;
+  width: number | string;
+  ariaLabel: string;
+}
+
+function WheelPicker({ items, value, onChange, format, width, ariaLabel }: WheelPickerProps) {
+  const pickerRef = useRef<HTMLDivElement>(null);
   const userScrollRef = useRef(false);
-  const scrollTimerRef = useRef(null);
+  const scrollTimerRef = useRef<any>(null);
   const didInitRef = useRef(false);
   const [previewValue, setPreviewValue] = useState(value);
 
-  function resolveNearest(scrollTop) {
+  function resolveNearest(scrollTop: number) {
     const index = Math.max(
       0,
       Math.min(items.length - 1, Math.round(scrollTop / PICKER_ITEM_HEIGHT))
@@ -117,7 +131,7 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
 
   useEffect(() => () => clearTimeout(scrollTimerRef.current), []);
 
-  function handleScroll(event) {
+  function handleScroll(event: React.UIEvent<HTMLDivElement>) {
     userScrollRef.current = true;
     const { nextValue } = resolveNearest(event.currentTarget.scrollTop);
     if (nextValue !== previewValue) setPreviewValue(nextValue);
@@ -135,10 +149,12 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
         width,
         height: PICKER_ITEM_HEIGHT * PICKER_VISIBLE_ROWS,
         borderRadius: 24,
-        background: "transparent",
-        border: "none",
+        background: "linear-gradient(160deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.34) 45%, rgba(230,249,251,0.28) 100%)",
+        border: "1px solid rgba(255,255,255,0.72)",
+        backdropFilter: "blur(14px) saturate(140%)",
+        WebkitBackdropFilter: "blur(14px) saturate(140%)",
         overflow: "hidden",
-        boxShadow: "none",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(15,188,201,0.08), 0 10px 22px rgba(15,188,201,0.12)",
       }}
     >
       <div
@@ -173,9 +189,9 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
                 scrollSnapAlign: "center",
                 background: "transparent",
                 border: "none",
-                color: isSelected ? "#056f81" : "#6e8697",
-                fontSize: isSelected ? 40 : 31,
-                fontWeight: isSelected ? 600 : 500,
+                color: isSelected ? "#0fbcc9" : "#999999",
+                fontSize: isSelected ? 42 : 32,
+                fontWeight: isSelected ? 700 : 500,
                 fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif",
                 cursor: "pointer",
                 transition: "all 0.16s ease",
@@ -195,7 +211,18 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background: "linear-gradient(180deg, rgba(230,243,247,0.9) 0%, rgba(230,243,247,0.4) 18%, rgba(230,243,247,0) 34%, rgba(230,243,247,0) 66%, rgba(230,243,247,0.4) 82%, rgba(230,243,247,0.9) 100%)",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.48) 18%, rgba(255,255,255,0.03) 34%, rgba(255,255,255,0.03) 66%, rgba(255,255,255,0.48) 82%, rgba(255,255,255,0.94) 100%)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: "36%",
+          pointerEvents: "none",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0) 100%)",
         }}
       />
       <div
@@ -206,11 +233,11 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
           top: "50%",
           height: PICKER_ITEM_HEIGHT,
           transform: "translateY(-50%)",
-          borderTop: "2px solid rgba(7,142,163,0.62)",
-          borderBottom: "2px solid rgba(7,142,163,0.62)",
-          background: "rgba(7,142,163,0.15)",
-          boxShadow: "inset 0 0 0 1px rgba(7,142,163,0.24), 0 0 12px rgba(9,175,193,0.2)",
+          borderTop: "2px solid rgba(15,188,201,0.66)",
+          borderBottom: "2px solid rgba(15,188,201,0.66)",
+          background: "linear-gradient(180deg, rgba(15,188,201,0.2) 0%, rgba(15,188,201,0.08) 100%)",
           borderRadius: 10,
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.26), 0 0 14px rgba(15,188,201,0.2)",
           pointerEvents: "none",
         }}
       />
@@ -219,7 +246,7 @@ function WheelPicker({ items, value, onChange, format, width, ariaLabel }) {
 }
 
 export default function App() {
-  const [records, setRecords] = useState(() => {
+  const [records, setRecords] = useState<any[]>(() => {
     try {
       const s = localStorage.getItem(STORAGE_KEY);
       return s ? JSON.parse(s) : seed;
@@ -228,7 +255,7 @@ export default function App() {
     }
   });
 
-  const initialWeightRef = useRef(null);
+  const initialWeightRef = useRef<string | null>(null);
   if (initialWeightRef.current === null) {
     initialWeightRef.current = latestWeightString(records);
   }
@@ -244,57 +271,13 @@ export default function App() {
   const [inputMemo, setInputMemo] = useState("");
   const [showMemo, setShowMemo] = useState(false);
   const [saveState, setSaveState] = useState("idle");
-  const [editId, setEditId] = useState(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [editWeight, setEditWeight] = useState("");
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   }, [records]);
-
-  useEffect(() => {
-    const upsertMeta = (name, content) => {
-      let el = document.head.querySelector(`meta[name="${name}"]`);
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("name", name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", content);
-    };
-    const upsertLink = (selector, attrs) => {
-      let el = document.head.querySelector(selector);
-      if (!el) {
-        el = document.createElement("link");
-        document.head.appendChild(el);
-      }
-      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    };
-
-    upsertMeta("apple-mobile-web-app-capable", "yes");
-    upsertMeta("apple-mobile-web-app-title", "WeightNote");
-    upsertLink('link[rel="apple-touch-icon"][sizes="180x180"]', {
-      rel: "apple-touch-icon",
-      sizes: "180x180",
-      href: "/icons/apple-touch-icon-180.png",
-    });
-    upsertLink('link[rel="icon"][sizes="32x32"]', {
-      rel: "icon",
-      type: "image/png",
-      sizes: "32x32",
-      href: "/icons/favicon-32.png",
-    });
-    upsertLink('link[rel="icon"][sizes="16x16"]', {
-      rel: "icon",
-      type: "image/png",
-      sizes: "16x16",
-      href: "/icons/favicon-16.png",
-    });
-    upsertLink('link[rel="manifest"]', {
-      rel: "manifest",
-      href: "/site.webmanifest",
-    });
-  }, []);
 
   const sorted = [...records].sort((a, b) => a.date.localeCompare(b.date));
   const latest = sorted[sorted.length - 1];
@@ -336,7 +319,7 @@ export default function App() {
 
   const graphData = (() => {
     const now = new Date();
-    let cutoff = null;
+    let cutoff: Date | null = null;
     if (period === "1M") {
       cutoff = new Date(now);
       cutoff.setMonth(cutoff.getMonth() - 1);
@@ -345,7 +328,7 @@ export default function App() {
       cutoff.setMonth(cutoff.getMonth() - 3);
     }
     if (!cutoff) return sorted;
-    const filtered = sorted.filter((r) => new Date(r.date) >= cutoff);
+    const filtered = sorted.filter((r) => new Date(r.date) >= cutoff!);
     return filtered.length ? filtered : sorted;
   })();
 
@@ -366,7 +349,7 @@ export default function App() {
   const yMin = yTicks[0];
   const yMax = yTicks[yTicks.length - 1];
 
-  function setPickerWeight(integer, decimal) {
+  function setPickerWeight(integer: number, decimal: number) {
     const nextWeight = `${integer}.${decimal}`;
     setPickerInt(integer);
     setPickerDec(decimal);
@@ -400,7 +383,7 @@ export default function App() {
     }, 300);
   }
 
-  function handleEditSave(id) {
+  function handleEditSave(id: string) {
     if (!editWeight || Number.isNaN(parseFloat(editWeight))) return;
     setRecords((prevRecords) => prevRecords.map((r) => (
       r.id === id ? { ...r, weight: +parseFloat(editWeight).toFixed(1) } : r
@@ -409,122 +392,116 @@ export default function App() {
     setEditWeight("");
   }
 
-  function handleDelete(id) {
+  function handleDelete(id: string) {
     setRecords((prevRecords) => prevRecords.filter((r) => r.id !== id));
     setDeleteConfirm(null);
   }
 
   const statCards = [
-    { label: "7일 평균", value: avg7 ? `${avg7}` : "—", unit: "kg", color: "#07abc0" },
+    { label: "7일 평균", value: avg7 ? `${avg7}` : "—", unit: "kg", color: "#0fbcc9" },
     {
       label: "주간 변화",
       value: weeklyChange !== null ? (weeklyChange > 0 ? `+${weeklyChange}` : `${weeklyChange}`) : "—",
       unit: weeklyChange !== null ? "kg" : "",
-      color: weeklyChange === null ? "#88a0ad" : weeklyChange < 0 ? "#1bc6a7" : weeklyChange > 0 ? "#ff6f96" : "#9ab2be"
+      color: weeklyChange === null ? "#999999" : weeklyChange < 0 ? "#0fbcc9" : weeklyChange > 0 ? "#ff5252" : "#747474"
     },
-    { label: "최고", value: maxW ?? "—", unit: maxW ? "kg" : "", color: "#ff7597" },
-    { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#1bc6a7" },
+    { label: "최고", value: maxW ?? "—", unit: maxW ? "kg" : "", color: "#ff5252" },
+    { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#0fbcc9" },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg,#eef8fb 0%,#e6f3f7 100%)", color: "#183140", fontFamily: "'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif", maxWidth: 430, margin: "0 auto" }}>
+    <div style={{ minHeight: "100vh", background: "#f7f8f9", color: "#000000", fontFamily: "'Pretendard', sans-serif", maxWidth: 430, margin: "0 auto" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
-        html{background:#e6f3f7;-webkit-text-size-adjust:108%;text-size-adjust:108%;}
+        html{background:#f7f8f9;-webkit-text-size-adjust:108%;text-size-adjust:108%;}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         input[type=number]{-moz-appearance:textfield;}
-        input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.45) saturate(0.85);cursor:pointer;}
+        input[type=date]::-webkit-calendar-picker-indicator{filter:grayscale(1) contrast(0.5);cursor:pointer;}
         ::-webkit-scrollbar{width:4px;}
         ::-webkit-scrollbar-track{background:transparent;}
-        ::-webkit-scrollbar-thumb{background:rgba(28,146,170,0.28);border-radius:4px;}
-        .period-btn{background:rgba(255,255,255,0.55);border:1px solid #cfe3e9;border-radius:20px;padding:6px 16px;font-size:14px;color:#587282;cursor:pointer;transition:all 0.15s;font-family:inherit;font-weight:500;}
-        .period-btn.on{background:linear-gradient(135deg,#1ec9d8,#0ab4c5);border-color:#0ab4c5;color:#f7fdff;box-shadow:0 8px 18px rgba(17,170,190,0.22);}
-        .tab-pill{flex:1;background:transparent;border:none;padding:12px 0;font-size:16px;cursor:pointer;font-family:inherit;transition:all 0.2s;border-radius:10px;}
-        .tab-pill.on{background:linear-gradient(180deg,#edfafd 0%,#e3f5fa 100%);color:#0d4b5d;font-weight:700;box-shadow:inset 0 0 0 1px rgba(12,176,196,0.2),0 8px 20px rgba(28,103,128,0.12);}
-        .tab-pill.off{color:#597485;font-weight:500;}
-        .wt-input{background:transparent;border:none;font-size:54px;font-family:'Manrope','Pretendard','Noto Sans KR',sans-serif;font-weight:600;color:#0ab3c4;text-align:center;width:160px;outline:none;caret-color:#0ab3c4;padding:0;}
-        .wt-input::placeholder{color:#95b8bf;}
-        .save-btn{width:100%;border:none;border-radius:16px;padding:17px;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.25s;letter-spacing:0.02em;}
-        .save-btn.ready{background:linear-gradient(135deg,#1fcbd9,#09b0c1);color:#f7fdff;box-shadow:0 10px 20px rgba(17,170,190,0.24);}
-        .save-btn.done{background:linear-gradient(135deg,#1fd7b3,#11b692);color:#063e3a;box-shadow:0 10px 20px rgba(21,176,145,0.22);}
-        .save-btn.duplicate{background:linear-gradient(135deg,#721737,#9b1f53);color:#ffd2e7;border:1px solid rgba(255,184,216,0.45);box-shadow:0 0 0 1px rgba(255,184,216,0.2) inset,0 8px 18px rgba(130,23,66,0.24);}
-        .save-btn.empty{background:#d7e8ed;color:#6f8898;cursor:default;}
-        .rec-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #dbeaf0;gap:10px;transition:background 0.15s;}
+        ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px;}
+        .period-btn{background:#ffffff;border:1px solid #eeeeee;border-radius:20px;padding:6px 16px;font-size:14px;color:#666666;cursor:pointer;transition:all 0.15s;font-family:inherit;font-weight:500;}
+        .period-btn.on{background:#0fbcc9;border-color:#0fbcc9;color:#ffffff;box-shadow:0 4px 12px rgba(15,188,201,0.2);}
+        .tab-pill{flex:1;background:transparent;border:none;padding:14px 0;font-size:16px;cursor:pointer;font-family:inherit;transition:all 0.2s;border-radius:12px;}
+        .tab-pill.on{background:#ffffff;color:#0fbcc9;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.06);}
+        .tab-pill.off{color:#888888;font-weight:500;}
+        .wt-input{background:transparent;border:none;font-size:54px;font-family:'Manrope',sans-serif;font-weight:700;color:#0fbcc9;text-align:center;width:160px;outline:none;caret-color:#0fbcc9;padding:0;}
+        .wt-input::placeholder{color:#dddddd;}
+        .save-btn{width:100%;border:none;border-radius:24px;padding:17px;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.25s;}
+        .save-btn.ready{background:#0fbcc9;color:#ffffff;box-shadow:0 8px 16px rgba(15,188,201,0.2);}
+        .save-btn.done{background:#0fbcc9;color:#ffffff;opacity:0.8;}
+        .save-btn.duplicate{background:#ff5252;color:#ffffff;box-shadow:0 8px 16px rgba(255,82,82,0.2);}
+        .save-btn.empty{background:#eeeeee;color:#aaaaaa;cursor:default;}
+        .rec-row{display:flex;align-items:center;padding:16px 0;border-bottom:1px solid #f2f2f2;gap:12px;transition:background 0.15s;}
         .rec-row:last-child{border-bottom:none;}
-        .ico-btn{background:transparent;border:none;cursor:pointer;color:#5f7989;padding:5px 7px;font-size:16px;transition:color 0.15s;line-height:1;}
-        .ico-btn:hover{color:#406579;}
-        .edit-inp{background:#f4fcfe;border:1px solid rgba(12,176,196,0.45);border-radius:8px;color:#089eb3;font-size:19px;font-family:'Manrope','Pretendard','Noto Sans KR',sans-serif;width:92px;padding:6px 9px;text-align:right;outline:none;}
-        .del-confirm{display:flex;gap:6px;align-items:center;}
-        .del-yes{background:#ffeef4;border:1px solid rgba(255,108,158,0.34);border-radius:8px;color:#d14678;font-size:14px;padding:6px 10px;cursor:pointer;font-family:inherit;}
-        .del-no{background:#f4fbfe;border:1px solid #d9eaf0;border-radius:8px;color:#5e7888;font-size:14px;padding:6px 10px;cursor:pointer;font-family:inherit;}
-        .wheel-pane::-webkit-scrollbar{display:none;}
+        .ico-btn{background:transparent;border:none;cursor:pointer;color:#999999;padding:6px;font-size:16px;transition:all 0.15s;line-height:1;border-radius:50%;}
+        .ico-btn:hover{background:rgba(0,0,0,0.05);color:#333333;}
+        .edit-inp{background:#ffffff;border:1px solid #0fbcc9;border-radius:10px;color:#0fbcc9;font-size:19px;font-family:'Manrope',sans-serif;width:92px;padding:6px 9px;text-align:right;outline:none;}
         @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-        .fade-up{animation:fadeUp 0.3s ease both;}
+        .fade-up{animation:fadeUp 0.35s ease both;}
+        .card{background:#ffffff;border-radius:24px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.04);border:1px solid #f0f0f0;}
       `}</style>
 
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(236,247,250,0.92)", backdropFilter: "blur(20px)", padding: "12px 20px 8px", borderBottom: "1px solid #d9ebf0" }}>
-        <div style={{ display: "flex", background: "rgba(255,255,255,0.75)", borderRadius: 14, padding: 4, gap: 3, boxShadow: "inset 0 0 0 1px #d2e8ee" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(247,248,249,0.9)", backdropFilter: "blur(20px)", padding: "16px 20px 10px", borderBottom: "1px solid #eeeeee" }}>
+        <div style={{ display: "flex", background: "#f0f2f3", borderRadius: 16, padding: 4, gap: 4 }}>
           <button className={`tab-pill ${tab === "main" ? "on" : "off"}`} onClick={() => setTab("main")}>체중 기록</button>
           <button className={`tab-pill ${tab === "manage" ? "on" : "off"}`} onClick={() => setTab("manage")}>기록 관리</button>
         </div>
       </div>
 
       {tab === "main" && (
-        <div style={{ paddingBottom: 40 }}>
-          <div style={{ padding: "28px 20px 24px", borderBottom: "1px solid #dcebf0" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+        <div style={{ padding: "16px 20px 40px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="card" style={{ padding: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
               <input
                 type="date"
                 value={inputDate}
                 max={todayStr()}
                 onChange={(e) => setInputDate(e.target.value)}
-                style={{ background: "#ffffff", border: "1px solid #d4e9ee", borderRadius: 12, color: "#3f5a6b", fontSize: 16, fontWeight: 500, padding: "10px 12px", fontFamily: "inherit", outline: "none", flex: 1, boxShadow: "0 6px 14px rgba(35,117,140,0.08)" }}
+                style={{ background: "#f5f6f7", border: "1px solid #eeeeee", borderRadius: 16, color: "#333333", fontSize: 16, fontWeight: 600, padding: "12px 14px", fontFamily: "inherit", outline: "none", flex: 1 }}
               />
               <button
                 type="button"
                 onClick={() => setInputDate(todayStr())}
-                style={{ background: "rgba(17,197,217,0.1)", border: "1px solid rgba(17,197,217,0.35)", borderRadius: 12, color: "#087f95", fontSize: 15, fontWeight: 700, padding: "8px 14px", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
+                style={{ background: "#ffffff", border: "1px solid #eeeeee", borderRadius: 16, color: "#0fbcc9", fontSize: 15, fontWeight: 700, padding: "12px 16px", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
               >
                 오늘
               </button>
             </div>
 
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 14, padding: "0 2px" }}>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 14 }}>
                 <WheelPicker
                   items={PICKER_INTEGERS}
                   value={pickerInt}
                   onChange={(nextInt) => setPickerWeight(nextInt, pickerDec)}
                   format={(item) => String(item)}
-                  width={172}
+                  width={140}
                   ariaLabel="체중 정수부 선택"
                 />
-                <div style={{ fontSize: 46, color: "#078ea3", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", marginTop: -3 }}>.</div>
+                <div style={{ fontSize: 46, color: "#0fbcc9", fontFamily: "'Manrope',sans-serif", marginTop: -3, fontWeight: 700 }}>.</div>
                 <WheelPicker
                   items={PICKER_DECIMALS}
                   value={pickerDec}
                   onChange={(nextDec) => setPickerWeight(pickerInt, nextDec)}
                   format={(item) => String(item)}
-                  width={126}
+                  width={100}
                   ariaLabel="체중 소수부 선택"
                 />
               </div>
-              <div
-                style={{ marginTop: 14, width: "100%", background: "transparent", border: "none", display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, padding: 0 }}
-              >
-                <span style={{ fontSize: 48, fontWeight: 600, fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", color: "#078ea3" }}>{inputWeight}</span>
-                <span style={{ fontSize: 24, color: "#4f6777", fontWeight: 500 }}>kg</span>
+              <div style={{ marginTop: 20, display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6 }}>
+                <span style={{ fontSize: 52, fontWeight: 800, fontFamily: "'Manrope',sans-serif", color: "#000000" }}>{inputWeight}</span>
+                <span style={{ fontSize: 24, color: "#666666", fontWeight: 600 }}>kg</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => setShowMemo((v) => !v)}
-              style={{ background: "transparent", border: "none", color: "#4f6777", fontSize: 17, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6, marginBottom: showMemo ? 10 : 16, padding: 0, fontWeight: 500 }}
+              style={{ background: "transparent", border: "none", color: "#666666", fontSize: 16, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6, marginBottom: showMemo ? 12 : 20, fontWeight: 600 }}
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d={showMemo ? "M2 8l4-4 4 4" : "M2 4l4 4 4-4"} stroke="#4f6777" strokeWidth="1.8" strokeLinecap="round" />
+                <path d={showMemo ? "M2 8l4-4 4 4" : "M2 4l4 4 4-4"} stroke="#666666" strokeWidth="2" strokeLinecap="round" />
               </svg>
               메모 {showMemo ? "닫기" : "추가"}
             </button>
@@ -532,46 +509,42 @@ export default function App() {
             {showMemo && (
               <input
                 type="text"
-                placeholder="오늘 컨디션, 메모..."
+                placeholder="어떤 일이 있었나요?"
                 value={inputMemo}
                 onChange={(e) => setInputMemo(e.target.value)}
-                style={{ background: "#ffffff", border: "1px solid #d4e9ee", borderRadius: 12, color: "#3d5565", fontSize: 16, padding: "11px 14px", width: "100%", fontFamily: "inherit", outline: "none", marginBottom: 16, boxShadow: "0 6px 14px rgba(35,117,140,0.06)" }}
+                style={{ background: "#f5f6f7", border: "1px solid #eeeeee", borderRadius: 16, color: "#333333", fontSize: 16, padding: "14px 18px", width: "100%", fontFamily: "inherit", outline: "none", marginBottom: 20 }}
               />
             )}
 
             <button
               className={`save-btn ${
-                saveState === "done"
-                  ? "done"
-                  : saveState === "duplicate"
-                    ? "duplicate"
-                    : inputWeight
-                      ? "ready"
-                      : "empty"
+                saveState === "done" ? "done" : saveState === "duplicate" ? "duplicate" : inputWeight ? "ready" : "empty"
               }`}
               onClick={handleSave}
               disabled={!inputWeight}
             >
-              {saveState === "done" ? "저장 완료" : saveState === "saving" ? "저장 중..." : saveState === "duplicate" ? "같은 날짜 기록 있음" : "저장"}
+              {saveState === "done" ? "기록되었습니다" : saveState === "saving" ? "처리 중..." : saveState === "duplicate" ? "이미 기록된 날짜" : "저장"}
             </button>
           </div>
 
-          <div style={{ padding: "20px 20px 0" }}>
-            <div style={{ fontSize: 14, color: "#3f5a6b", letterSpacing: "0.08em", marginBottom: 12, fontWeight: 800 }}>분석</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
+          <div style={{ padding: "12px 4px 4px" }}>
+            <div style={{ fontSize: 15, color: "#000000", fontWeight: 800, marginBottom: 16 }}>분석 리포트</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {statCards.map((s) => (
-                <div key={s.label} style={{ background: "#ffffff", border: "1px solid #d9ebf0", borderRadius: 16, padding: "14px 16px", boxShadow: "0 10px 20px rgba(33,108,131,0.08)" }}>
-                  <div style={{ fontSize: 13, color: "#5f7a8a", letterSpacing: "0.04em", marginBottom: 8, fontWeight: 500 }}>{s.label}</div>
+                <div key={s.label} className="card" style={{ padding: "16px 18px" }}>
+                  <div style={{ fontSize: 14, color: "#888888", marginBottom: 10, fontWeight: 500 }}>{s.label}</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                    <span style={{ fontSize: 34, fontWeight: 600, fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", color: s.color }}>{s.value}</span>
-                    {s.unit && <span style={{ fontSize: 17, color: "#5f7a8a", fontWeight: 500 }}>{s.unit}</span>}
+                    <span style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Manrope',sans-serif", color: s.color }}>{s.value}</span>
+                    {s.unit && <span style={{ fontSize: 16, color: "#888888", fontWeight: 600 }}>{s.unit}</span>}
                   </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, color: "#3f5a6b", letterSpacing: "0.08em", fontWeight: 800 }}>통계</div>
+          <div className="card" style={{ padding: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 15, color: "#000000", fontWeight: 800 }}>체중 통계</div>
               <div style={{ display: "flex", gap: 6 }}>
                 {["1M", "3M", "ALL"].map((p) => (
                   <button key={p} className={`period-btn ${period === p ? "on" : ""}`} onClick={() => setPeriod(p)}>
@@ -581,114 +554,124 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ height: 220, marginBottom: 8, background: "#f7fdff", border: "1px solid #d4e9ee", borderRadius: 16, padding: "10px 8px 4px" }}>
+            <div style={{ height: 220, marginBottom: 4 }}>
               {graphData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={graphData} margin={{ top: 8, right: 8, bottom: 0, left: -22 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#dcebf0" vertical={false} />
-                    <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 13, fill: "#577384" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                    <YAxis domain={[yMin, yMax]} ticks={yTicks} allowDecimals={false} tick={{ fontSize: 13, fill: "#577384" }} axisLine={false} tickLine={false} />
-                    <Tooltip content={<ChartTooltip />} />
+                  <LineChart data={graphData} margin={{ top: 10, right: 10, bottom: 0, left: -25 }}>
+                    <CartesianGrid strokeDasharray="0" stroke="#f0f0f0" vertical={false} />
+                    <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                    <YAxis domain={[yMin, yMax]} ticks={yTicks} allowDecimals={false} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                    <Tooltip content={(props) => <ChartTooltip {...props} />} />
                     <Line
                       type="monotone"
                       dataKey="weight"
-                      stroke="#0ab4c5"
-                      strokeWidth={2.2}
+                      stroke="#0fbcc9"
+                      strokeWidth={3}
                       dot={<CustomDot latest={latest?.date} />}
-                      activeDot={{ fill: "#0ab4c5", r: 5, strokeWidth: 0 }}
+                      activeDot={{ fill: "#0fbcc9", r: 6, stroke: "#ffffff", strokeWidth: 2 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#5f7888", fontSize: 15, fontWeight: 500 }}>데이터 부족</div>
+                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaaaaa", fontSize: 15 }}>데이터가 없습니다</div>
               )}
             </div>
           </div>
 
-          <div style={{ padding: "20px 20px 0" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, color: "#3f5a6b", letterSpacing: "0.08em", fontWeight: 800 }}>최근 기록</div>
+          <div style={{ padding: "12px 4px 4px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 15, color: "#000000", fontWeight: 800 }}>최근 기록</div>
               <button
                 type="button"
                 onClick={() => setTab("manage")}
-                style={{ background: "transparent", border: "none", color: "#557182", fontSize: 15, cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}
+                style={{ background: "transparent", border: "none", color: "#0fbcc9", fontSize: 15, cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}
               >
-                전체 보기 →
+                더보기
               </button>
             </div>
-            {[...sorted].reverse().slice(0, 5).map((r, i) => {
-              const p = sorted[sorted.indexOf(r) - 1];
-              const d = p ? +(r.weight - p.weight).toFixed(1) : null;
-              const diffText = d === null ? "\u00A0" : `${d > 0 ? "+" : ""}${d}`;
-              const diffColor = d === null ? "transparent" : d < 0 ? "#1bc6a7" : d > 0 ? "#ff7398" : "#607c8d";
-              return (
-                <div key={r.id} className="rec-row fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 16, color: "#4d6878", fontWeight: 500 }}>{fmtFull(r.date)}</div>
-                    {r.memo && <div style={{ fontSize: 14, color: "#587484", marginTop: 3 }}>{r.memo}</div>}
+            <div className="card" style={{ padding: "4px 20px" }}>
+              {[...sorted].reverse().slice(0, 5).map((r: any, i) => {
+                const p = sorted[sorted.indexOf(r) - 1];
+                const d = p ? +(r.weight - p.weight).toFixed(1) : null;
+                const diffText = d === null ? "" : `${d > 0 ? "+" : ""}${d}`;
+                const diffColor = d === null ? "transparent" : d < 0 ? "#0fbcc9" : d > 0 ? "#ff5252" : "#888888";
+                return (
+                  <div key={r.id} className="rec-row">
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 16, color: "#000000", fontWeight: 600 }}>{fmtFull(r.date)}</div>
+                      {r.memo && <div style={{ fontSize: 14, color: "#777777", marginTop: 2, fontWeight: 500 }}>{r.memo}</div>}
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 4, justifyContent: "flex-end" }}>
+                        <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 26, fontWeight: 700, color: "#000000" }}>{r.weight}</span>
+                        <span style={{ fontSize: 15, color: "#888888", fontWeight: 600 }}>kg</span>
+                      </div>
+                      <span style={{ fontSize: 14, color: diffColor, fontFamily: "'Manrope',sans-serif", fontWeight: 700 }}>
+                        {diffText}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                    <span style={{ fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontSize: 31, fontWeight: 600, color: "#078ea3" }}>{r.weight}</span>
-                    <span style={{ fontSize: 15, color: "#4d6878", fontWeight: 500 }}>kg</span>
-                  </div>
-                  <span style={{ fontSize: 19, color: diffColor, minWidth: 52, textAlign: "right", fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontWeight: 600 }}>
-                    {diffText}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
       {tab === "manage" && (
-        <div style={{ padding: "24px 20px 40px" }}>
-          <div style={{ fontSize: 14, color: "#546f80", letterSpacing: "0.08em", marginBottom: 16, fontWeight: 600 }}>
-            총 {sorted.length}개 기록
+        <div style={{ padding: "16px 20px 40px" }}>
+          <div style={{ fontSize: 15, color: "#000000", fontWeight: 800, marginBottom: 16 }}>
+            전체 기록 ({sorted.length})
           </div>
-          {[...sorted].reverse().map((r, i) => (
-            <div key={r.id} className="rec-row fade-up" style={{ animationDelay: `${i * 0.03}s` }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 16, color: "#3f5968", fontWeight: 500 }}>{fmtFull(r.date)}</div>
-                {r.memo && <div style={{ fontSize: 14, color: "#557182", marginTop: 3 }}>{r.memo}</div>}
+          <div className="card" style={{ padding: "4px 20px" }}>
+            {[...sorted].reverse().map((r: any, i) => (
+              <div key={r.id} className="rec-row">
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, color: "#000000", fontWeight: 600 }}>{fmtFull(r.date)}</div>
+                  {r.memo && <div style={{ fontSize: 14, color: "#666666", marginTop: 2, fontWeight: 500 }}>{r.memo}</div>}
+                </div>
+                {editId === r.id ? (
+                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editWeight}
+                      onChange={(e) => setEditWeight(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleEditSave(r.id)}
+                      className="edit-inp"
+                      autoFocus
+                    />
+                    <button type="button" className="ico-btn" style={{ color: "#0fbcc9" }} onClick={() => handleEditSave(r.id)}>✓</button>
+                    <button type="button" className="ico-btn" onClick={() => setEditId(null)}>✕</button>
+                  </div>
+                ) : deleteConfirm === r.id ? (
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button type="button" onClick={() => handleDelete(r.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 10, color: "#ef4444", fontSize: 14, padding: "8px 12px", fontWeight: 700 }}>삭제</button>
+                    <button type="button" onClick={() => setDeleteConfirm(null)} style={{ background: "#f3f4f6", border: "none", borderRadius: 10, color: "#666666", fontSize: 14, padding: "8px 12px", fontWeight: 700 }}>취소</button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ textAlign: "right", marginRight: 4 }}>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
+                        <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 24, color: "#000000", fontWeight: 700 }}>{r.weight}</span>
+                        <span style={{ fontSize: 14, color: "#888888", fontWeight: 600 }}>kg</span>
+                      </div>
+                    </div>
+                    <button type="button" className="ico-btn" onClick={() => { setEditId(r.id); setEditWeight(r.weight.toString()); }}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                        <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" />
+                      </svg>
+                    </button>
+                    <button type="button" className="ico-btn" onClick={() => setDeleteConfirm(r.id)}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                        <path d="M2 4h10M5 4V3h4v1M6 6.5v4M8 6.5v4M3 4l1 7h6l1-7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
-              {editId === r.id ? (
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={editWeight}
-                    onChange={(e) => setEditWeight(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleEditSave(r.id)}
-                    className="edit-inp"
-                    autoFocus
-                  />
-                  <button type="button" className="ico-btn" style={{ color: "#12acbe" }} onClick={() => handleEditSave(r.id)}>✓</button>
-                  <button type="button" className="ico-btn" onClick={() => setEditId(null)}>✕</button>
-                </div>
-              ) : deleteConfirm === r.id ? (
-                <div className="del-confirm">
-                  <button type="button" className="del-yes" onClick={() => handleDelete(r.id)}>삭제</button>
-                  <button type="button" className="del-no" onClick={() => setDeleteConfirm(null)}>취소</button>
-                </div>
-              ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontFamily: "'Manrope','Pretendard','Noto Sans KR',sans-serif", fontSize: 30, color: "#078ea3", fontWeight: 600 }}>{r.weight}</span>
-                  <span style={{ fontSize: 15, color: "#4d6878", fontWeight: 500 }}>kg</span>
-                  <button type="button" className="ico-btn" onClick={() => { setEditId(r.id); setEditWeight(r.weight.toString()); }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                      <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" />
-                    </svg>
-                  </button>
-                  <button type="button" className="ico-btn" style={{ color: "#d25784" }} onClick={() => setDeleteConfirm(r.id)}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                      <path d="M2 4h10M5 4V3h4v1M6 6.5v4M8 6.5v4M3 4l1 7h6l1-7" />
-                    </svg>
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
