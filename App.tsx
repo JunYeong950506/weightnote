@@ -451,7 +451,7 @@ export default function App() {
         .wt-input::placeholder{color:#dddddd;}
         .save-btn{width:100%;border:none;border-radius:24px;padding:17px;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.25s;}
         .save-btn.ready{background:#0fbcc9;color:#ffffff;box-shadow:0 8px 16px rgba(15,188,201,0.2);}
-        .save-btn.done{background:#0fbcc9;color:#ffffff;opacity:0.8;}
+        .save-btn.done{background:#22b573;color:#ffffff;box-shadow:0 8px 16px rgba(34,181,115,0.26);}
         .save-btn.duplicate{background:#ff5252;color:#ffffff;box-shadow:0 8px 16px rgba(255,82,82,0.2);}
         .save-btn.empty{background:#eeeeee;color:#aaaaaa;cursor:default;}
         .rec-row{display:flex;align-items:center;padding:16px 0;border-bottom:1px solid #f2f2f2;gap:12px;transition:background 0.15s;}
