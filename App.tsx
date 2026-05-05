@@ -17,6 +17,7 @@ const PICKER_INTEGERS = Array.from({ length: PICKER_MAX - PICKER_MIN + 1 }, (_, 
 const PICKER_ITEM_HEIGHT = 50;
 const PICKER_VISIBLE_ROWS = 5;
 const PICKER_EDGE_ROWS = Math.floor(PICKER_VISIBLE_ROWS / 2);
+const MOVING_AVERAGE_COLOR = "#ff8fb3";
 
 const seed: any[] = [];
 
@@ -73,11 +74,13 @@ const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) =>
   return (
     <div style={{ background: "#ffffff", border: "1px solid rgba(15,188,201,0.15)", borderRadius: 14, padding: "10px 16px", boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}>
       <div style={{ fontSize: 13, color: "#666666", marginBottom: 4, fontWeight: 500 }}>{fmtKo(payload[0].payload.date)}</div>
-      <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'Manrope','Pretendard',sans-serif", color: "#0fbcc9" }}>
-        {weightPayload?.value ?? payload[0].value}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
-      </div>
+      {weightPayload && (
+        <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'Manrope','Pretendard',sans-serif", color: "#0fbcc9" }}>
+          {weightPayload.value}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
+        </div>
+      )}
       {movingAveragePayload && (
-        <div style={{ fontSize: 13, color: "#1fa971", marginTop: 4, fontWeight: 700 }}>
+        <div style={{ fontSize: 13, color: MOVING_AVERAGE_COLOR, marginTop: 4, fontWeight: 700 }}>
           7일 이동평균 {movingAveragePayload.value}kg
         </div>
       )}
@@ -303,6 +306,8 @@ export default function App() {
   const [editId, setEditId] = useState<string | null>(null);
   const [editWeight, setEditWeight] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showWeightLine, setShowWeightLine] = useState(true);
+  const [showMovingAverageLine, setShowMovingAverageLine] = useState(true);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
@@ -359,7 +364,11 @@ export default function App() {
 
   const yTicks = (() => {
     if (!graphData.length) return [60, 65, 70, 75, 80];
-    const chartWeights = graphData.flatMap((r) => [r.weight, r.movingAverage]);
+    const visibleWeights = graphData.flatMap((r) => [
+      showWeightLine ? r.weight : null,
+      showMovingAverageLine ? r.movingAverage : null,
+    ]).filter((v): v is number => typeof v === "number");
+    const chartWeights = visibleWeights.length ? visibleWeights : graphData.map((r) => r.weight);
     const minWeight = Math.min(...chartWeights);
     const maxWeight = Math.max(...chartWeights);
     let start = Math.floor((minWeight - 0.5) / 5) * 5;
@@ -588,22 +597,26 @@ export default function App() {
                     <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                     <YAxis domain={[yMin, yMax]} ticks={yTicks} allowDecimals={false} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} />
                     <Tooltip content={(props) => <ChartTooltip {...props} />} />
-                    <Line
-                      type="monotone"
-                      dataKey="weight"
-                      stroke="#0fbcc9"
-                      strokeWidth={3}
-                      dot={<CustomDot latest={latest?.date} />}
-                      activeDot={{ fill: "#0fbcc9", r: 6, stroke: "#ffffff", strokeWidth: 2 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="movingAverage"
-                      stroke="#1fa971"
-                      strokeWidth={2.5}
-                      dot={false}
-                      activeDot={{ fill: "#1fa971", r: 5, stroke: "#ffffff", strokeWidth: 2 }}
-                    />
+                    {showWeightLine && (
+                      <Line
+                        type="monotone"
+                        dataKey="weight"
+                        stroke="#0fbcc9"
+                        strokeWidth={3}
+                        dot={<CustomDot latest={latest?.date} />}
+                        activeDot={{ fill: "#0fbcc9", r: 6, stroke: "#ffffff", strokeWidth: 2 }}
+                      />
+                    )}
+                    {showMovingAverageLine && (
+                      <Line
+                        type="monotone"
+                        dataKey="movingAverage"
+                        stroke={MOVING_AVERAGE_COLOR}
+                        strokeWidth={1.6}
+                        dot={false}
+                        activeDot={{ fill: MOVING_AVERAGE_COLOR, r: 5, stroke: "#ffffff", strokeWidth: 2 }}
+                      />
+                    )}
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
@@ -612,14 +625,24 @@ export default function App() {
             </div>
             {graphData.length > 0 && (
               <div style={{ display: "flex", justifyContent: "center", gap: 14, color: "#777777", fontSize: 12, fontWeight: 700 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <button
+                  type="button"
+                  aria-pressed={showWeightLine}
+                  onClick={() => setShowWeightLine((v) => !v)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, color: showWeightLine ? "#777777" : "#c8c8c8", fontSize: 12, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", opacity: showWeightLine ? 1 : 0.55 }}
+                >
                   <span style={{ width: 8, height: 8, borderRadius: 999, background: "#0fbcc9" }} />
                   체중
-                </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 999, background: "#1fa971" }} />
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={showMovingAverageLine}
+                  onClick={() => setShowMovingAverageLine((v) => !v)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, color: showMovingAverageLine ? "#777777" : "#c8c8c8", fontSize: 12, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", opacity: showMovingAverageLine ? 1 : 0.55 }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: 999, background: MOVING_AVERAGE_COLOR }} />
                   7일 이동평균
-                </span>
+                </button>
               </div>
             )}
           </div>
