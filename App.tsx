@@ -315,9 +315,6 @@ export default function App() {
     setInputWeight(normalized);
   }, [inputDate, records]);
 
-  const allWeights = sorted.map((r) => r.weight);
-  const minW = allWeights.length ? Math.min(...allWeights) : null;
-  const maxW = allWeights.length ? Math.max(...allWeights) : null;
   const last7 = sorted.slice(-7);
   const avg7 = last7.length ? +(last7.reduce((s, r) => s + r.weight, 0) / last7.length).toFixed(1) : null;
 
@@ -353,6 +350,10 @@ export default function App() {
     const filtered = sorted.filter((r) => new Date(r.date) >= cutoff!);
     return filtered.length ? filtered : sorted;
   })();
+
+  const periodWeights = graphData.map((r) => r.weight);
+  const minW = periodWeights.length ? Math.min(...periodWeights) : null;
+  const maxW = periodWeights.length ? Math.max(...periodWeights) : null;
 
   const yTicks = (() => {
     if (!graphData.length) return [60, 65, 70, 75, 80];
