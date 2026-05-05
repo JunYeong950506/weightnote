@@ -68,12 +68,19 @@ const CustomDot = (props: any) => {
 
 const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
+  const weightPayload = payload.find((item) => item.dataKey === "weight");
+  const movingAveragePayload = payload.find((item) => item.dataKey === "movingAverage");
   return (
     <div style={{ background: "#ffffff", border: "1px solid rgba(15,188,201,0.15)", borderRadius: 14, padding: "10px 16px", boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}>
       <div style={{ fontSize: 13, color: "#666666", marginBottom: 4, fontWeight: 500 }}>{fmtKo(payload[0].payload.date)}</div>
       <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'Manrope','Pretendard',sans-serif", color: "#0fbcc9" }}>
-        {payload[0].value}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
+        {weightPayload?.value ?? payload[0].value}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
       </div>
+      {movingAveragePayload && (
+        <div style={{ fontSize: 13, color: "#1fa971", marginTop: 4, fontWeight: 700 }}>
+          7일 이동평균 {movingAveragePayload.value}kg
+        </div>
+      )}
     </div>
   );
 };
@@ -315,26 +322,14 @@ export default function App() {
     setInputWeight(normalized);
   }, [inputDate, records]);
 
+  const movingAverageData = sorted.map((record, index) => {
+    const windowRecords = sorted.slice(Math.max(0, index - 6), index + 1);
+    const movingAverage = windowRecords.reduce((sum, r) => sum + r.weight, 0) / windowRecords.length;
+    return { ...record, movingAverage: +movingAverage.toFixed(1) };
+  });
+
   const last7 = sorted.slice(-7);
   const avg7 = last7.length ? +(last7.reduce((s, r) => s + r.weight, 0) / last7.length).toFixed(1) : null;
-
-  const weeklyChange = (() => {
-    if (sorted.length < 2) return null;
-    const now = new Date();
-    const weekAgo = new Date(now);
-    weekAgo.setDate(now.getDate() - 7);
-    const thisWeek = sorted.filter((r) => new Date(r.date) >= weekAgo);
-    const prevWeek = sorted.filter((r) => {
-      const d = new Date(r.date);
-      const twoWeeksAgo = new Date(now);
-      twoWeeksAgo.setDate(now.getDate() - 14);
-      return d >= twoWeeksAgo && d < weekAgo;
-    });
-    if (!thisWeek.length || !prevWeek.length) return null;
-    const thisAvg = thisWeek.reduce((s, r) => s + r.weight, 0) / thisWeek.length;
-    const prevAvg = prevWeek.reduce((s, r) => s + r.weight, 0) / prevWeek.length;
-    return +(thisAvg - prevAvg).toFixed(1);
-  })();
 
   const graphData = (() => {
     const now = new Date();
@@ -346,19 +341,27 @@ export default function App() {
       cutoff = new Date(now);
       cutoff.setMonth(cutoff.getMonth() - 3);
     }
-    if (!cutoff) return sorted;
-    const filtered = sorted.filter((r) => new Date(r.date) >= cutoff!);
-    return filtered.length ? filtered : sorted;
+    if (!cutoff) return movingAverageData;
+    const filtered = movingAverageData.filter((r) => new Date(r.date) >= cutoff!);
+    return filtered.length ? filtered : movingAverageData;
   })();
 
   const periodWeights = graphData.map((r) => r.weight);
   const minW = periodWeights.length ? Math.min(...periodWeights) : null;
   const maxW = periodWeights.length ? Math.max(...periodWeights) : null;
+  const weightSpeed = (() => {
+    if (graphData.length < 2) return null;
+    const first = graphData[0];
+    const last = graphData[graphData.length - 1];
+    const days = Math.max(1, (new Date(last.date).getTime() - new Date(first.date).getTime()) / 86400000);
+    return +(((last.weight - first.weight) / days) * 7).toFixed(1);
+  })();
 
   const yTicks = (() => {
     if (!graphData.length) return [60, 65, 70, 75, 80];
-    const minWeight = Math.min(...graphData.map((r) => r.weight));
-    const maxWeight = Math.max(...graphData.map((r) => r.weight));
+    const chartWeights = graphData.flatMap((r) => [r.weight, r.movingAverage]);
+    const minWeight = Math.min(...chartWeights);
+    const maxWeight = Math.max(...chartWeights);
     let start = Math.floor((minWeight - 0.5) / 5) * 5;
     let end = Math.ceil((maxWeight + 0.5) / 5) * 5;
     if (start === end) {
@@ -423,10 +426,10 @@ export default function App() {
   const statCards = [
     { label: "7일 평균", value: avg7 ? `${avg7}` : "—", unit: "kg", color: "#0fbcc9" },
     {
-      label: "주간 변화",
-      value: weeklyChange !== null ? (weeklyChange > 0 ? `+${weeklyChange}` : `${weeklyChange}`) : "—",
-      unit: weeklyChange !== null ? "kg" : "",
-      color: weeklyChange === null ? "#999999" : weeklyChange < 0 ? "#1fa971" : weeklyChange > 0 ? "#ff5252" : "#747474"
+      label: "감량 속도",
+      value: weightSpeed !== null ? (weightSpeed > 0 ? `+${weightSpeed}` : `${weightSpeed}`) : "—",
+      unit: weightSpeed !== null ? "kg/주" : "",
+      color: weightSpeed === null ? "#999999" : weightSpeed < 0 ? "#1fa971" : weightSpeed > 0 ? "#ff5252" : "#747474"
     },
     { label: "최고", value: maxW ?? "—", unit: maxW ? "kg" : "", color: "#ff5252" },
     { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#1fa971" },
@@ -593,12 +596,32 @@ export default function App() {
                       dot={<CustomDot latest={latest?.date} />}
                       activeDot={{ fill: "#0fbcc9", r: 6, stroke: "#ffffff", strokeWidth: 2 }}
                     />
+                    <Line
+                      type="monotone"
+                      dataKey="movingAverage"
+                      stroke="#1fa971"
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ fill: "#1fa971", r: 5, stroke: "#ffffff", strokeWidth: 2 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaaaaa", fontSize: 15 }}>데이터가 없습니다</div>
               )}
             </div>
+            {graphData.length > 0 && (
+              <div style={{ display: "flex", justifyContent: "center", gap: 14, color: "#777777", fontSize: 12, fontWeight: 700 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 999, background: "#0fbcc9" }} />
+                  체중
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 999, background: "#1fa971" }} />
+                  7일 이동평균
+                </span>
+              </div>
+            )}
           </div>
 
           <div style={{ padding: "12px 4px 4px" }}>
