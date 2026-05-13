@@ -42,7 +42,7 @@ function fmtFull(dateStr: string) {
 }
 
 function fmtDecimal(value: number | null | undefined) {
-  return typeof value === "number" ? value.toFixed(1) : "—";
+  return typeof value === "number" && Number.isFinite(value) ? value.toFixed(1) : "—";
 }
 
 function fmtSignedDecimal(value: number) {
@@ -84,12 +84,12 @@ const ChartTooltip = ({ active, payload }: { active?: any; payload?: any[] }) =>
       <div style={{ fontSize: 13, color: "#666666", marginBottom: 4, fontWeight: 500 }}>{fmtKo(payload[0].payload.date)}</div>
       {weightPayload && (
         <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'Manrope','Pretendard',sans-serif", color: "#0fbcc9" }}>
-          {weightPayload.value}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
+          {fmtDecimal(Number(weightPayload.value))}<span style={{ fontSize: 14, color: "#666666", marginLeft: 4, fontWeight: 500 }}>kg</span>
         </div>
       )}
       {movingAveragePayload && (
         <div style={{ fontSize: 13, color: MOVING_AVERAGE_COLOR, marginTop: 4, fontWeight: 700 }}>
-          7일 이동평균 {movingAveragePayload.value}kg
+          7일 이동평균 {fmtDecimal(Number(movingAveragePayload.value))}kg
         </div>
       )}
     </div>
@@ -442,11 +442,11 @@ export default function App() {
   }
 
   const weightSpeedStatus = (() => {
-    if (weightSpeed === null) return { color: "#999999", note: "기록 2개 이상 필요" };
-    if (weightSpeed >= 0) return { color: "#ff5c8a", note: "유지 또는 증가, 원인 확인" };
-    if (weightSpeed <= -1.0) return { color: "#ff9f43", note: "빠른 편, 근손실/피로 주의" };
-    if (weightSpeed <= -0.5) return { color: "#20c997", note: "적정 감량 속도" };
-    return { color: "#f6c84c", note: "감량 부족, 식단 조정 필요" };
+    if (weightSpeed === null) return { color: "#999999", note: "기록 더 필요" };
+    if (weightSpeed >= 0) return { color: "#ff5c8a", note: "증가 원인 확인" };
+    if (weightSpeed <= -1.0) return { color: "#ff9f43", note: "빠른 감량 주의" };
+    if (weightSpeed <= -0.5) return { color: "#20c997", note: "적정 속도" };
+    return { color: "#f6c84c", note: "감량 부족" };
   })();
 
   const statCards = [
@@ -596,6 +596,7 @@ export default function App() {
                     } : undefined}
                     style={{
                       padding: "16px 18px",
+                      position: "relative",
                       cursor: isWeightSpeed ? "pointer" : "default",
                       borderColor: isWeightSpeed && showWeightSpeedInfo ? "rgba(15,188,201,0.35)" : "#f0f0f0",
                     }}
@@ -605,42 +606,34 @@ export default function App() {
                       <span style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Manrope',sans-serif", color: s.color }}>{s.value}</span>
                       {s.unit && <span style={{ fontSize: 16, color: "#888888", fontWeight: 600 }}>{s.unit}</span>}
                     </div>
+                    {isWeightSpeed && showWeightSpeedInfo && (
+                      <div
+                        role="status"
+                        style={{
+                          position: "absolute",
+                          top: "calc(100% + 8px)",
+                          right: 0,
+                          zIndex: 20,
+                          minWidth: 158,
+                          background: "#ffffff",
+                          border: `1px solid ${weightSpeedStatus.color}`,
+                          borderRadius: 16,
+                          boxShadow: "0 12px 28px rgba(0,0,0,0.12)",
+                          padding: "10px 12px",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <div style={{ fontSize: 12, color: "#777777", fontWeight: 700, marginBottom: 3 }}>감량 속도</div>
+                        <div style={{ fontSize: 15, color: weightSpeedStatus.color, lineHeight: 1.35, fontWeight: 800 }}>
+                          {weightSpeedStatus.note}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
-
-          {showWeightSpeedInfo && (
-            <div
-              role="status"
-              onClick={() => setShowWeightSpeedInfo(false)}
-              style={{
-                position: "fixed",
-                left: "50%",
-                bottom: 24,
-                transform: "translateX(-50%)",
-                zIndex: 100,
-                width: "min(390px, calc(100% - 32px))",
-                background: "#ffffff",
-                border: `1px solid ${weightSpeedStatus.color}`,
-                borderRadius: 20,
-                boxShadow: "0 14px 34px rgba(0,0,0,0.14)",
-                padding: "16px 18px",
-                cursor: "pointer",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-                <span style={{ fontSize: 15, color: "#000000", fontWeight: 800 }}>감량 속도 안내</span>
-                <span style={{ fontSize: 18, color: weightSpeedStatus.color, fontFamily: "'Manrope',sans-serif", fontWeight: 800 }}>
-                  {weightSpeed !== null ? `${fmtSignedDecimal(weightSpeed)}kg/주` : "—"}
-                </span>
-              </div>
-              <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.45, color: weightSpeedStatus.color, fontWeight: 800 }}>
-                {weightSpeedStatus.note}
-              </div>
-            </div>
-          )}
 
           <div className="card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -660,7 +653,7 @@ export default function App() {
                   <LineChart data={graphData} margin={{ top: 10, right: 10, bottom: 0, left: -25 }}>
                     <CartesianGrid strokeDasharray="0" stroke="#f0f0f0" vertical={false} />
                     <XAxis dataKey="date" tickFormatter={fmtShort} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                    <YAxis domain={[yMin, yMax]} ticks={yTicks} allowDecimals={false} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[yMin, yMax]} ticks={yTicks} tickFormatter={(value) => fmtDecimal(Number(value))} allowDecimals={false} tick={{ fontSize: 12, fill: "#999999", fontWeight: 500 }} axisLine={false} tickLine={false} />
                     <Tooltip content={(props) => <ChartTooltip {...props} />} />
                     {showWeightLine && (
                       <Line
