@@ -316,6 +316,7 @@ export default function App() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showWeightLine, setShowWeightLine] = useState(true);
   const [showMovingAverageLine, setShowMovingAverageLine] = useState(true);
+  const [showWeightSpeedInfo, setShowWeightSpeedInfo] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
@@ -454,8 +455,7 @@ export default function App() {
       label: "감량 속도",
       value: weightSpeed !== null ? fmtSignedDecimal(weightSpeed) : "—",
       unit: weightSpeed !== null ? "kg/주" : "",
-      color: weightSpeedStatus.color,
-      note: weightSpeedStatus.note
+      color: weightSpeedStatus.color
     },
     { label: "최고", value: fmtDecimal(maxW), unit: maxW !== null ? "kg" : "", color: "#ff5252" },
     { label: "최저", value: fmtDecimal(minW), unit: minW !== null ? "kg" : "", color: "#1fa971" },
@@ -582,22 +582,65 @@ export default function App() {
           <div style={{ padding: "12px 4px 4px" }}>
             <div style={{ fontSize: 15, color: "#000000", fontWeight: 800, marginBottom: 16 }}>분석 리포트</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {statCards.map((s) => (
-                <div key={s.label} className="card" style={{ padding: "16px 18px" }}>
-                  <div style={{ fontSize: 14, color: "#888888", marginBottom: 10, fontWeight: 500 }}>{s.label}</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                    <span style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Manrope',sans-serif", color: s.color }}>{s.value}</span>
-                    {s.unit && <span style={{ fontSize: 16, color: "#888888", fontWeight: 600 }}>{s.unit}</span>}
-                  </div>
-                  {"note" in s && s.note && (
-                    <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.35, color: s.color, fontWeight: 700 }}>
-                      {s.note}
+              {statCards.map((s) => {
+                const isWeightSpeed = s.label === "감량 속도";
+                return (
+                  <div
+                    key={s.label}
+                    className="card"
+                    role={isWeightSpeed ? "button" : undefined}
+                    tabIndex={isWeightSpeed ? 0 : undefined}
+                    onClick={isWeightSpeed ? () => setShowWeightSpeedInfo((v) => !v) : undefined}
+                    onKeyDown={isWeightSpeed ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") setShowWeightSpeedInfo((v) => !v);
+                    } : undefined}
+                    style={{
+                      padding: "16px 18px",
+                      cursor: isWeightSpeed ? "pointer" : "default",
+                      borderColor: isWeightSpeed && showWeightSpeedInfo ? "rgba(15,188,201,0.35)" : "#f0f0f0",
+                    }}
+                  >
+                    <div style={{ fontSize: 14, color: "#888888", marginBottom: 10, fontWeight: 500 }}>{s.label}</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                      <span style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Manrope',sans-serif", color: s.color }}>{s.value}</span>
+                      {s.unit && <span style={{ fontSize: 16, color: "#888888", fontWeight: 600 }}>{s.unit}</span>}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
+
+          {showWeightSpeedInfo && (
+            <div
+              role="status"
+              onClick={() => setShowWeightSpeedInfo(false)}
+              style={{
+                position: "fixed",
+                left: "50%",
+                bottom: 24,
+                transform: "translateX(-50%)",
+                zIndex: 100,
+                width: "min(390px, calc(100% - 32px))",
+                background: "#ffffff",
+                border: `1px solid ${weightSpeedStatus.color}`,
+                borderRadius: 20,
+                boxShadow: "0 14px 34px rgba(0,0,0,0.14)",
+                padding: "16px 18px",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+                <span style={{ fontSize: 15, color: "#000000", fontWeight: 800 }}>감량 속도 안내</span>
+                <span style={{ fontSize: 18, color: weightSpeedStatus.color, fontFamily: "'Manrope',sans-serif", fontWeight: 800 }}>
+                  {weightSpeed !== null ? `${fmtSignedDecimal(weightSpeed)}kg/주` : "—"}
+                </span>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.45, color: weightSpeedStatus.color, fontWeight: 800 }}>
+                {weightSpeedStatus.note}
+              </div>
+            </div>
+          )}
 
           <div className="card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
