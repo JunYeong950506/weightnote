@@ -41,6 +41,14 @@ function fmtFull(dateStr: string) {
   return `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, "0")}. ${String(d.getDate()).padStart(2, "0")}`;
 }
 
+function fmtDecimal(value: number | null | undefined) {
+  return typeof value === "number" ? value.toFixed(1) : "—";
+}
+
+function fmtSignedDecimal(value: number) {
+  return `${value > 0 ? "+" : ""}${value.toFixed(1)}`;
+}
+
 function clampWeight(value: string | number | null) {
   if (value === "" || value === null || Number.isNaN(Number(value))) return "";
   const clamped = Math.min(PICKER_MAX + 0.9, Math.max(PICKER_MIN, Number(value)));
@@ -432,16 +440,25 @@ export default function App() {
     setDeleteConfirm(null);
   }
 
+  const weightSpeedStatus = (() => {
+    if (weightSpeed === null) return { color: "#999999", note: "기록 2개 이상 필요" };
+    if (weightSpeed >= 0) return { color: "#ff5c8a", note: "유지 또는 증가, 원인 확인" };
+    if (weightSpeed <= -1.0) return { color: "#ff9f43", note: "빠른 편, 근손실/피로 주의" };
+    if (weightSpeed <= -0.5) return { color: "#20c997", note: "적정 감량 속도" };
+    return { color: "#f6c84c", note: "감량 부족, 식단 조정 필요" };
+  })();
+
   const statCards = [
-    { label: "7일 평균", value: avg7 ? `${avg7}` : "—", unit: "kg", color: "#0fbcc9" },
+    { label: "7일 평균", value: fmtDecimal(avg7), unit: avg7 !== null ? "kg" : "", color: "#0fbcc9" },
     {
       label: "감량 속도",
-      value: weightSpeed !== null ? (weightSpeed > 0 ? `+${weightSpeed}` : `${weightSpeed}`) : "—",
+      value: weightSpeed !== null ? fmtSignedDecimal(weightSpeed) : "—",
       unit: weightSpeed !== null ? "kg/주" : "",
-      color: weightSpeed === null ? "#999999" : weightSpeed < 0 ? "#1fa971" : weightSpeed > 0 ? "#ff5252" : "#747474"
+      color: weightSpeedStatus.color,
+      note: weightSpeedStatus.note
     },
-    { label: "최고", value: maxW ?? "—", unit: maxW ? "kg" : "", color: "#ff5252" },
-    { label: "최저", value: minW ?? "—", unit: minW ? "kg" : "", color: "#1fa971" },
+    { label: "최고", value: fmtDecimal(maxW), unit: maxW !== null ? "kg" : "", color: "#ff5252" },
+    { label: "최저", value: fmtDecimal(minW), unit: minW !== null ? "kg" : "", color: "#1fa971" },
   ];
 
   return (
@@ -572,6 +589,11 @@ export default function App() {
                     <span style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Manrope',sans-serif", color: s.color }}>{s.value}</span>
                     {s.unit && <span style={{ fontSize: 16, color: "#888888", fontWeight: 600 }}>{s.unit}</span>}
                   </div>
+                  {"note" in s && s.note && (
+                    <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.35, color: s.color, fontWeight: 700 }}>
+                      {s.note}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -662,7 +684,7 @@ export default function App() {
               {[...sorted].reverse().slice(0, 5).map((r: any, i) => {
                 const p = sorted[sorted.indexOf(r) - 1];
                 const d = p ? +(r.weight - p.weight).toFixed(1) : null;
-                const diffText = d === null ? "\u00A0" : `${d > 0 ? "+" : ""}${d}`;
+                const diffText = d === null ? "\u00A0" : fmtSignedDecimal(d);
                 const diffColor = d === null ? "transparent" : d < 0 ? "#1fa971" : d > 0 ? "#ff5252" : "#888888";
                 return (
                   <div key={r.id} className="rec-row">
@@ -671,7 +693,7 @@ export default function App() {
                       {r.memo && <div style={{ fontSize: 14, color: "#777777", marginTop: 2, fontWeight: 500 }}>{r.memo}</div>}
                     </div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginLeft: 8 }}>
-                      <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 26, fontWeight: 700, color: "#000000" }}>{r.weight}</span>
+                      <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 26, fontWeight: 700, color: "#000000" }}>{fmtDecimal(r.weight)}</span>
                       <span style={{ fontSize: 15, color: "#888888", fontWeight: 600 }}>kg</span>
                     </div>
                     <span
@@ -729,11 +751,11 @@ export default function App() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{ textAlign: "right", marginRight: 4 }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
-                        <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 24, color: "#000000", fontWeight: 700 }}>{r.weight}</span>
+                        <span style={{ fontFamily: "'Manrope',sans-serif", fontSize: 24, color: "#000000", fontWeight: 700 }}>{fmtDecimal(r.weight)}</span>
                         <span style={{ fontSize: 14, color: "#888888", fontWeight: 600 }}>kg</span>
                       </div>
                     </div>
-                    <button type="button" className="ico-btn" onClick={() => { setEditId(r.id); setEditWeight(r.weight.toString()); }}>
+                    <button type="button" className="ico-btn" onClick={() => { setEditId(r.id); setEditWeight(fmtDecimal(r.weight)); }}>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
                         <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" />
                       </svg>
